@@ -1,62 +1,52 @@
-import { useEffect, useState } from "react";
-import { supabase } from "./lib/supabase";
+// src/App.tsx
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import PatientDetail from "./pages/PatientDetail";
+import LogVitals from "./pages/LogVitals";
+import AddPatient from "./pages/AddPatient";
+import Dashboard from "./pages/Dashboard";
+import AddUser from "./pages/AddUser";
+import Patients from "./pages/Patients";
 
-function App() {
-  const [patients, setPatients] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadPatients() {
-      const { data, error } = await supabase
-        .from("patients")
-        .select("*");
-
-      console.log("Patients Data:", data);
-      console.log("Patients Error:", error);
-
-      if (error) {
-        console.error(error);
-      } else {
-        setPatients(data || []);
-      }
-
-      setLoading(false);
-    }
-
-    loadPatients();
-  }, []);
-
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { session, loading } = useAuth();
   if (loading) {
-    return <h2>Loading...</h2>;
+    return (
+      <div className="min-h-screen bg-dark flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
-
-  return (
-    <div style={{ padding: "20px" }}>
-      <h1>Patients</h1>
-
-      {patients.length === 0 ? (
-        <p>No patients found</p>
-      ) : (
-        patients.map((patient) => (
-          <div
-            key={patient.patient_id}
-            style={{
-              border: "1px solid gray",
-              padding: "10px",
-              marginBottom: "10px",
-              borderRadius: "8px",
-            }}
-          >
-            <h3>{patient.name}</h3>
-            <p>Age: {patient.age}</p>
-            <p>Gender: {patient.gender}</p>
-            <p>Phone: {patient.phone}</p>
-            <p>Address: {patient.address}</p>
-          </div>
-        ))
-      )}
-    </div>
-  );
+  return session ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
-export default App;
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { session, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dark flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+  return !session ? <>{children}</> : <Navigate to="/dashboard" replace />;
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
+      <Route path="/patient/:id" element={<ProtectedRoute><PatientDetail /></ProtectedRoute>} />
+      <Route path="/log-vitals/:id" element={<ProtectedRoute><LogVitals /></ProtectedRoute>} />
+      <Route path="/add-patient" element={<ProtectedRoute><AddPatient /></ProtectedRoute>} />
+      <Route path="/add-doctor" element={<ProtectedRoute><AddUser role="doctor" /></ProtectedRoute>} />
+      <Route path="/add-nurse" element={<ProtectedRoute><AddUser role="nurse" /></ProtectedRoute>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
