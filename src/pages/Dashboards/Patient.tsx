@@ -1,10 +1,11 @@
 // src/pages/dashboards/PatientDashboard.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Layout from "../../components/Layout";
-import { Activity, FileText, User } from "lucide-react";
+import { Activity, User, Stethoscope, HeartPulse } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function PatientDashboard() {
   const { session } = useAuth();
@@ -42,9 +43,20 @@ export default function PatientDashboard() {
               </p>
             </div>
             
-            <Link to={`/patient/${patient.patient_id}`} className="mt-4 inline-flex px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-semibold items-center gap-2 shadow-lg shadow-purple-500/20">
-              <FileText size={18}/> View My Medical Records
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 border-t border-gray-100 pt-6">
+              <Link 
+                to="/my-doctor" 
+                className="flex items-center gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+              >
+                <Stethoscope size={18} /> View My Doctor
+              </Link>
+              <Link 
+                to="/my-nurse" 
+                className="flex items-center gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+              >
+                <HeartPulse size={18} /> View My Nurse
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="text-center py-12 bg-white shadow-sm border border-gray-200 rounded-xl">

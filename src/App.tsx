@@ -9,6 +9,12 @@ import AddPatient from "./pages/AddPatient";
 import Dashboard from "./pages/Dashboard";
 import AddUser from "./pages/AddUser";
 import Patients from "./pages/Patients";
+import Doctors from "./pages/Doctors";
+import Nurses from "./pages/Nurses";
+import StaffDetail from "./pages/StaffDetail";
+import MyMedications from "./pages/MyMedications";
+import MyDoctor from "./pages/MyDoctor";
+import MyNurse from "./pages/MyNurse";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
@@ -41,6 +47,12 @@ export default function App() {
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
+      <Route path="/doctors" element={<ProtectedRoute><Doctors /></ProtectedRoute>} />
+      <Route path="/nurses" element={<ProtectedRoute><Nurses /></ProtectedRoute>} />
+      <Route path="/my-medications" element={<ProtectedRoute><MyMedications /></ProtectedRoute>} />
+      <Route path="/my-doctor" element={<ProtectedRoute><MyDoctor /></ProtectedRoute>} />
+      <Route path="/my-nurse" element={<ProtectedRoute><MyNurse /></ProtectedRoute>} />
+      <Route path="/staff/:id" element={<ProtectedRoute><StaffDetail /></ProtectedRoute>} />
       <Route path="/patient/:id" element={<ProtectedRoute><PatientDetail /></ProtectedRoute>} />
       <Route path="/log-vitals/:id" element={<ProtectedRoute><LogVitals /></ProtectedRoute>} />
       <Route path="/add-patient" element={<ProtectedRoute><AddPatient /></ProtectedRoute>} />

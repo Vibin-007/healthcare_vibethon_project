@@ -3,9 +3,12 @@ import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard,
   Users,
+  Stethoscope,
+  HeartPulse,
   LogOut,
   X,
-  PlusSquare
+  PlusSquare,
+  Pill
 } from "lucide-react";
 
 interface SidebarProps {
@@ -17,7 +20,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const { profile, signOut } = useAuth();
 
   const overviewItems = [
-    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "doctor", "nurse", "patient"] },
+    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "patient"] },
+    { to: "/my-medications", label: "My Medications", icon: Pill, roles: ["patient"] },
+    { to: "/my-doctor", label: "My Doctor", icon: Stethoscope, roles: ["patient"] },
+    { to: "/my-nurse", label: "My Nurse", icon: HeartPulse, roles: ["patient"] },
+    { to: "/doctors", label: "Doctors", icon: Stethoscope, roles: ["admin"] },
+    { to: "/nurses", label: "Nurses", icon: HeartPulse, roles: ["admin"] },
     { to: "/patients", label: "Patients", icon: Users, roles: ["admin", "doctor", "nurse"] },
   ];
 

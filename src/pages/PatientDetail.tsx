@@ -13,6 +13,11 @@ import {
   User,
   AlertTriangle,
   Activity,
+  Pill,
+  Trash2,
+  Plus,
+  Stethoscope,
+  HeartPulse as NurseIcon
 } from "lucide-react";
 import {
   LineChart,
@@ -35,6 +40,8 @@ interface Patient {
   phone: string;
   created_at: string;
   user_id: string;
+  assigned_doctor_id?: string;
+  assigned_nurse_id?: string;
 }
 
 interface VitalsRecord {
@@ -51,14 +58,31 @@ interface VitalsRecord {
 }
 
 
+interface Medication {
+  medication_id: string;
+  patient_id: string;
+  medicine_name: string;
+  dosage: string;
+  frequency: string;
+  created_at: string;
+}
 
 export default function PatientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [vitals, setVitals] = useState<VitalsRecord[]>([]);
+  const [medications, setMedications] = useState<Medication[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"chart" | "table">("chart");
+  
+  // New Medication State
+  const [showAddMedication, setShowAddMedication] = useState(false);
+  const [newMedication, setNewMedication] = useState({ medicine_name: "", dosage: "", frequency: "" });
+  const [submittingMed, setSubmittingMed] = useState(false);
+  
+  const [assignedDoctor, setAssignedDoctor] = useState<string | null>(null);
+  const [assignedNurse, setAssignedNurse] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -70,17 +94,80 @@ export default function PatientDetail() {
 
       if (patientData) {
         setPatient(patientData);
+        
+        // Fetch doctor name
+        if (patientData.assigned_doctor_id) {
+          const { data: doc } = await supabase.from("doctors").select("user_id").eq("doctor_id", patientData.assigned_doctor_id).single();
+          if (doc) {
+            const { data: userDoc } = await supabase.from("users").select("name").eq("user_id", doc.user_id).single();
+            if (userDoc) setAssignedDoctor(`Dr. ${userDoc.name}`);
+          }
+        }
+        
+        // Fetch nurse name
+        if (patientData.assigned_nurse_id) {
+          const { data: nurse } = await supabase.from("nurses").select("user_id").eq("nurse_id", patientData.assigned_nurse_id).single();
+          if (nurse) {
+            const { data: userNurse } = await supabase.from("users").select("name").eq("user_id", nurse.user_id).single();
+            if (userNurse) setAssignedNurse(userNurse.name);
+          }
+        }
+        
         const { data: vitalsData } = await supabase
           .from("vitals")
           .select("*")
           .eq("patient_id", id)
           .order("recorded_at", { ascending: true });
         setVitals(vitalsData || []);
+
+        const { data: medsData } = await supabase
+          .from("medications")
+          .select("*")
+          .eq("patient_id", id)
+          .order("created_at", { ascending: false });
+        setMedications(medsData || []);
       }
       setLoading(false);
     }
     load();
   }, [id]);
+
+  const handleAddMedication = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingMed(true);
+    
+    const { data, error } = await supabase
+      .from("medications")
+      .insert([
+        { 
+          patient_id: id,
+          medicine_name: newMedication.medicine_name,
+          dosage: newMedication.dosage,
+          frequency: newMedication.frequency
+        }
+      ])
+      .select();
+      
+    if (!error && data) {
+      setMedications([data[0], ...medications]);
+      setNewMedication({ medicine_name: "", dosage: "", frequency: "" });
+      setShowAddMedication(false);
+    }
+    setSubmittingMed(false);
+  };
+
+  const handleRemoveMedication = async (medId: string) => {
+    if (!window.confirm("Are you sure you want to remove this medication?")) return;
+    
+    const { error } = await supabase
+      .from("medications")
+      .delete()
+      .eq("medication_id", medId);
+      
+    if (!error) {
+      setMedications(medications.filter(m => m.medication_id !== medId));
+    }
+  };
 
   if (loading) {
     return (
@@ -164,6 +251,24 @@ export default function PatientDetail() {
               </span>
             </div>
           </div>
+          
+          {/* Assigned Staff Mini-Banner */}
+          {(assignedDoctor || assignedNurse) && (
+            <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap gap-4">
+              {assignedDoctor && (
+                <div className="flex items-center gap-2 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg text-sm font-medium">
+                  <Stethoscope size={16} />
+                  <span>Assigned Doctor: {assignedDoctor}</span>
+                </div>
+              )}
+              {assignedNurse && (
+                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg text-sm font-medium">
+                  <NurseIcon size={16} />
+                  <span>Assigned Nurse: {assignedNurse}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -366,6 +471,115 @@ export default function PatientDetail() {
             </p>
           </div>
         )}
+
+        {/* Medications Section */}
+        <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden mt-6">
+          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <Pill size={20} className="text-purple-600" />
+              Medications
+            </h2>
+            <button
+              onClick={() => setShowAddMedication(!showAddMedication)}
+              className="bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors border border-purple-100"
+            >
+              <Plus size={16} /> Add Medication
+            </button>
+          </div>
+          
+          {showAddMedication && (
+            <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+              <form onSubmit={handleAddMedication} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={newMedication.medicine_name}
+                    onChange={(e) => setNewMedication({ ...newMedication, medicine_name: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-sm"
+                    placeholder="e.g. Lisinopril"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Dosage</label>
+                  <input
+                    type="text"
+                    required
+                    value={newMedication.dosage}
+                    onChange={(e) => setNewMedication({ ...newMedication, dosage: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-sm"
+                    placeholder="e.g. 10mg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Frequency</label>
+                  <input
+                    type="text"
+                    required
+                    value={newMedication.frequency}
+                    onChange={(e) => setNewMedication({ ...newMedication, frequency: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-sm"
+                    placeholder="e.g. Once daily"
+                  />
+                </div>
+                <div>
+                  <button
+                    type="submit"
+                    disabled={submittingMed}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 h-[38px]"
+                  >
+                    {submittingMed ? "Saving..." : "Save Medication"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          <div className="p-0">
+            {medications.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left text-gray-500">
+                  <thead className="text-xs text-gray-400 uppercase bg-transparent border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-3 font-medium">Medication Name</th>
+                      <th className="px-6 py-3 font-medium">Dosage</th>
+                      <th className="px-6 py-3 font-medium">Frequency</th>
+                      <th className="px-6 py-3 font-medium">Added On</th>
+                      <th className="px-6 py-3 font-medium text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {medications.map((med) => (
+                      <tr key={med.medication_id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4 font-medium text-gray-900">{med.medicine_name}</td>
+                        <td className="px-6 py-4 text-gray-500">{med.dosage}</td>
+                        <td className="px-6 py-4 text-gray-500">{med.frequency}</td>
+                        <td className="px-6 py-4 text-gray-500">
+                          {new Date(med.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => handleRemoveMedication(med.medication_id)}
+                            className="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center"
+                            title="Remove Medication"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-8 text-center">
+                <Pill size={32} className="text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500">No medications recorded yet</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </Layout>
   );

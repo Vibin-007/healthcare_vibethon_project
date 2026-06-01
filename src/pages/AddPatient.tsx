@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase, supabaseAdminClient } from "../lib/supabase";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -13,7 +13,7 @@ import {
   Stethoscope,
   Mail,
   Lock,
-  MapPin,
+  MapPin
 } from "lucide-react";
 
 export default function AddPatient() {
@@ -21,6 +21,9 @@ export default function AddPatient() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  
+  const [doctorsList, setDoctorsList] = useState<any[]>([]);
+  const [nursesList, setNursesList] = useState<any[]>([]);
 
   const [form, setForm] = useState({
     name: "",
@@ -31,7 +34,28 @@ export default function AddPatient() {
     disease_condition: "",
     phone: "",
     address: "",
+    assigned_doctor_id: "",
+    assigned_nurse_id: "",
   });
+
+  useEffect(() => {
+    async function fetchStaff() {
+      // Fetch users to get names mapping
+      const { data: users } = await supabase.from("users").select("user_id, name");
+      const userMap = (users || []).reduce((acc: any, u: any) => ({ ...acc, [u.user_id]: u.name }), {});
+
+      const { data: docs } = await supabase.from("doctors").select("doctor_id, user_id");
+      if (docs) {
+        setDoctorsList(docs.map(d => ({ doctor_id: d.doctor_id, name: userMap[d.user_id] || "Unknown" })));
+      }
+
+      const { data: nurs } = await supabase.from("nurses").select("nurse_id, user_id");
+      if (nurs) {
+        setNursesList(nurs.map(n => ({ nurse_id: n.nurse_id, name: userMap[n.user_id] || "Unknown" })));
+      }
+    }
+    fetchStaff();
+  }, []);
 
   const handleChange = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -87,6 +111,8 @@ export default function AddPatient() {
         disease_condition: form.disease_condition || null,
         phone: form.phone || null,
         address: form.address || null,
+        assigned_doctor_id: form.assigned_doctor_id || null,
+        assigned_nurse_id: form.assigned_nurse_id || null,
       },
     ]);
 
@@ -94,7 +120,7 @@ export default function AddPatient() {
       setError(insertError.message);
     } else {
       setSuccess(true);
-      setForm({ name: "", email: "", password: "", gender: "", age: "", disease_condition: "", phone: "", address: "" });
+      setForm({ name: "", email: "", password: "", gender: "", age: "", disease_condition: "", phone: "", address: "", assigned_doctor_id: "", assigned_nurse_id: "" });
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
@@ -111,6 +137,8 @@ export default function AddPatient() {
     { key: "disease_condition", label: "Condition / Diagnosis", icon: HeartPulse, placeholder: "e.g., Hypertension", type: "text", required: false },
     { key: "phone", label: "Phone Number", icon: Phone, placeholder: "+1 (555) 123-4567", type: "tel", required: false },
     { key: "address", label: "Address", icon: MapPin, placeholder: "123 Main St", type: "text", required: false },
+    { key: "assigned_doctor_id", label: "Assign Doctor", icon: Stethoscope, type: "doctor_select", required: false },
+    { key: "assigned_nurse_id", label: "Assign Nurse", icon: HeartPulse, type: "nurse_select", required: false },
   ];
 
   return (
@@ -161,6 +189,32 @@ export default function AddPatient() {
                   {field.options?.map((opt) => (
                     <option key={opt} value={opt} className="bg-white shadow-sm">
                       {opt || "Select gender"}
+                    </option>
+                  ))}
+                </select>
+              ) : field.type === "doctor_select" ? (
+                <select
+                  value={form.assigned_doctor_id}
+                  onChange={(e) => handleChange("assigned_doctor_id", e.target.value)}
+                  className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all"
+                >
+                  <option value="">No Doctor Assigned</option>
+                  {doctorsList.map((doc) => (
+                    <option key={doc.doctor_id} value={doc.doctor_id} className="bg-white shadow-sm">
+                      Dr. {doc.name}
+                    </option>
+                  ))}
+                </select>
+              ) : field.type === "nurse_select" ? (
+                <select
+                  value={form.assigned_nurse_id}
+                  onChange={(e) => handleChange("assigned_nurse_id", e.target.value)}
+                  className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all"
+                >
+                  <option value="">No Nurse Assigned</option>
+                  {nursesList.map((nurse) => (
+                    <option key={nurse.nurse_id} value={nurse.nurse_id} className="bg-white shadow-sm">
+                      {nurse.name}
                     </option>
                   ))}
                 </select>
