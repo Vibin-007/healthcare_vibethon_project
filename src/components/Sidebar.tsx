@@ -20,7 +20,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const { profile, signOut } = useAuth();
 
   const overviewItems = [
-    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "patient"] },
+    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "patient", "doctor", "nurse"] },
     { to: "/my-medications", label: "My Medications", icon: Pill, roles: ["patient"] },
     { to: "/my-doctor", label: "My Doctor", icon: Stethoscope, roles: ["patient"] },
     { to: "/my-nurse", label: "My Nurse", icon: HeartPulse, roles: ["patient"] },

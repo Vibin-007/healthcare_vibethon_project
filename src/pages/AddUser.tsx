@@ -24,6 +24,7 @@ export default function AddUser({ role }: AddUserProps) {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState({ email: "", password: "", name: "" });
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
@@ -109,12 +110,20 @@ export default function AddUser({ role }: AddUserProps) {
       }
     }
 
+    setCreatedCredentials({ email: form.email, password: form.password, name: form.name });
     setSuccess(true);
     setForm({ name: "", email: "", password: "", phone: "", address: "", specialization: "" });
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 1500);
     setSubmitting(false);
+  };
+
+  const handleEmailCredentials = () => {
+    const roleTitle = role.charAt(0).toUpperCase() + role.slice(1);
+    const subject = encodeURIComponent(`Welcome to Medicare - Your ${roleTitle} Account Credentials`);
+    const prefix = role === "doctor" ? "Dr. " : "";
+    const body = encodeURIComponent(
+      `Hello ${prefix}${createdCredentials.name},\n\nYour staff account has been successfully created.\n\nLogin URL: ${window.location.origin}\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}\n\nPlease change your password after your first login.\n\nBest regards,\nMedicare Admin`
+    );
+    window.location.href = `mailto:${createdCredentials.email}?subject=${subject}&body=${body}`;
   };
 
   const isDoctor = role === "doctor";
@@ -147,15 +156,33 @@ export default function AddUser({ role }: AddUserProps) {
         </div>
 
         {success && (
-          <div className="flex items-center gap-2 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-            <CheckCircle2 size={18} className="text-emerald-400" />
-            <p className="text-emerald-400 text-sm font-medium">
-              {role.charAt(0).toUpperCase() + role.slice(1)} account created successfully!
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={24} className="text-emerald-500" />
+              <h3 className="text-emerald-700 text-lg font-semibold">{role.charAt(0).toUpperCase() + role.slice(1)} account created successfully!</h3>
+            </div>
+            <p className="text-emerald-600 text-sm">
+              The account has been created. You can now securely email them their login credentials.
             </p>
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                onClick={handleEmailCredentials}
+                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                <Mail size={16} /> Email Credentials
+              </button>
+              <button
+                onClick={() => navigate(role === "doctor" ? "/doctors" : "/nurses")}
+                className="flex items-center justify-center gap-2 bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                Return to Directory
+              </button>
+            </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white shadow-sm border border-gray-200 rounded-xl p-6 space-y-5">
+        {!success && (
+          <form onSubmit={handleSubmit} className="bg-white shadow-sm border border-gray-200 rounded-xl p-6 space-y-5">
           <div>
             <label className="flex items-center gap-1.5 text-sm text-gray-500 mb-1.5">
               <User size={14} className="text-gray-500" /> Full Name <span className="text-red-400">*</span>
@@ -252,9 +279,10 @@ export default function AddUser({ role }: AddUserProps) {
             disabled={submitting}
             className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? "Creating Account..." : `Create ${role.charAt(0).toUpperCase() + role.slice(1)}`}
+            {submitting ? "Creating..." : title}
           </button>
         </form>
+        )}
       </div>
     </Layout>
   );

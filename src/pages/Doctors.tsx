@@ -50,6 +50,18 @@ export default function Doctors() {
   const confirmRemove = async () => {
     if (!userToDelete) return;
     
+    // First find the doctor_id
+    const { data: docData } = await supabase.from("doctors").select("doctor_id").eq("user_id", userToDelete).single();
+    
+    if (docData?.doctor_id) {
+      // Nullify references in patients table
+      await supabase.from("patients").update({ assigned_doctor_id: null }).eq("assigned_doctor_id", docData.doctor_id);
+      
+      // Nullify references in health logs
+      await supabase.from("health_logs").update({ doctor_id: null }).eq("doctor_id", docData.doctor_id);
+    }
+    
+    // Now safe to delete the doctor profile and user record
     await supabase.from("doctors").delete().eq("user_id", userToDelete);
     await supabase.from("users").delete().eq("user_id", userToDelete);
     

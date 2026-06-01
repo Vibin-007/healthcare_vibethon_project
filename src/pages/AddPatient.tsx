@@ -20,6 +20,7 @@ export default function AddPatient() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState({ email: "", password: "", name: "" });
   const [error, setError] = useState("");
   
   const [doctorsList, setDoctorsList] = useState<any[]>([]);
@@ -119,13 +120,19 @@ export default function AddPatient() {
     if (insertError) {
       setError(insertError.message);
     } else {
+      setCreatedCredentials({ email: form.email, password: form.password, name: form.name });
       setSuccess(true);
       setForm({ name: "", email: "", password: "", gender: "", age: "", disease_condition: "", phone: "", address: "", assigned_doctor_id: "", assigned_nurse_id: "" });
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1500);
     }
     setSubmitting(false);
+  };
+
+  const handleEmailCredentials = () => {
+    const subject = encodeURIComponent("Welcome to Medicare - Your Account Credentials");
+    const body = encodeURIComponent(
+      `Hello ${createdCredentials.name},\n\nYour account has been successfully created.\n\nLogin URL: ${window.location.origin}\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}\n\nPlease change your password after your first login.\n\nBest regards,\nMedicare Admin`
+    );
+    window.location.href = `mailto:${createdCredentials.email}?subject=${subject}&body=${body}`;
   };
 
   const fields = [
@@ -166,13 +173,33 @@ export default function AddPatient() {
         </div>
 
         {success && (
-          <div className="flex items-center gap-2 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-            <CheckCircle2 size={18} className="text-emerald-400" />
-            <p className="text-emerald-400 text-sm font-medium">Patient admitted successfully! Redirecting...</p>
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={24} className="text-emerald-500" />
+              <h3 className="text-emerald-700 text-lg font-semibold">Patient Admitted Successfully!</h3>
+            </div>
+            <p className="text-emerald-600 text-sm">
+              The patient account has been created. You can now securely email them their login credentials.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                onClick={handleEmailCredentials}
+                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                <Mail size={16} /> Email Credentials
+              </button>
+              <button
+                onClick={() => navigate("/patients")}
+                className="flex items-center justify-center gap-2 bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                Return to Directory
+              </button>
+            </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white shadow-sm border border-gray-200 rounded-xl p-6 space-y-5">
+        {!success && (
+          <form onSubmit={handleSubmit} className="bg-white shadow-sm border border-gray-200 rounded-xl p-6 space-y-5">
           {fields.map((field) => (
             <div key={field.key}>
               <label className="flex items-center gap-1.5 text-sm text-gray-500 mb-1.5">
@@ -246,6 +273,7 @@ export default function AddPatient() {
             {submitting ? "Admitting Patient..." : "Admit Patient"}
           </button>
         </form>
+        )}
       </div>
     </Layout>
   );

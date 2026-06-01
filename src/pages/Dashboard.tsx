@@ -3,7 +3,8 @@ import { useAuth } from "../context/AuthContext";
 import Layout from "../components/Layout";
 import AdminDashboard from "./Dashboards/Admin";
 import PatientDashboard from "./Dashboards/Patient";
-import { Navigate } from "react-router-dom";
+import DoctorDashboard from "./Dashboards/Doctor";
+import NurseDashboard from "./Dashboards/Nurse";
 
 export default function Dashboard() {
   const { profile, loading } = useAuth();
@@ -22,8 +23,9 @@ export default function Dashboard() {
     case "admin":
       return <AdminDashboard />;
     case "doctor":
+      return <DoctorDashboard />;
     case "nurse":
-      return <Navigate to="/patients" replace />;
+      return <NurseDashboard />;
     case "patient":
       return <PatientDashboard />;
     default:

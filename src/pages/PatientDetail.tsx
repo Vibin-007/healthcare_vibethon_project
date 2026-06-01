@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { generateVitalsInsight } from "../lib/ai";
 import Layout from "../components/Layout";
 import {
   ArrowLeft,
   HeartPulse,
-  Thermometer,
   Wind,
   Droplets,
   Phone,
@@ -17,7 +17,8 @@ import {
   Trash2,
   Plus,
   Stethoscope,
-  HeartPulse as NurseIcon
+  HeartPulse as NurseIcon,
+  Sparkles
 } from "lucide-react";
 import {
   LineChart,
@@ -45,16 +46,15 @@ interface Patient {
 }
 
 interface VitalsRecord {
-  id: string;
-  blood_pressure_systolic: number;
-  blood_pressure_diastolic: number;
+  log_id: string;
   heart_rate: number;
-  temperature: number;
-  oxygen_saturation: number;
-  respiratory_rate: number;
-  weight: number;
+  blood_pressure: string;
+  sleep_hours: number;
+  pain_level: number;
+  symptoms: string;
   notes: string;
-  recorded_at: string;
+  log_date: string;
+  created_at: string;
 }
 
 
@@ -83,6 +83,7 @@ export default function PatientDetail() {
   
   const [assignedDoctor, setAssignedDoctor] = useState<string | null>(null);
   const [assignedNurse, setAssignedNurse] = useState<string | null>(null);
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -114,10 +115,10 @@ export default function PatientDetail() {
         }
         
         const { data: vitalsData } = await supabase
-          .from("vitals")
+          .from("health_logs")
           .select("*")
           .eq("patient_id", id)
-          .order("recorded_at", { ascending: true });
+          .order("created_at", { ascending: true });
         setVitals(vitalsData || []);
 
         const { data: medsData } = await supabase
@@ -126,6 +127,33 @@ export default function PatientDetail() {
           .eq("patient_id", id)
           .order("created_at", { ascending: false });
         setMedications(medsData || []);
+
+        // First try to fetch from database
+        const { data: insightData } = await supabase
+          .from("ai_insights")
+          .select("insight_message")
+          .eq("patient_id", id)
+          .order("generated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+          
+        if (insightData?.insight_message) {
+          setAiInsight(insightData.insight_message);
+        } else if (vitalsData && vitalsData.length > 0) {
+          // If RLS blocked the insert or table is empty, dynamically generate it on the fly!
+          const latest = vitalsData[vitalsData.length - 1];
+          const dynamicInsight = await generateVitalsInsight({
+            heart_rate: latest.heart_rate,
+            blood_pressure: latest.blood_pressure,
+            sleep_hours: latest.sleep_hours,
+            pain_level: latest.pain_level,
+            symptoms: latest.symptoms
+          }, patientData.disease_condition);
+          
+          if (dynamicInsight) {
+            setAiInsight(dynamicInsight);
+          }
+        }
       }
       setLoading(false);
     }
@@ -200,29 +228,52 @@ export default function PatientDetail() {
 
   const latestMetrics = [
     { label: "Heart Rate", value: latestVitals?.heart_rate, unit: "bpm", icon: HeartPulse, color: "text-red-400", bg: "bg-red-500/10" },
-    { label: "Temperature", value: latestVitals?.temperature, unit: "°F", icon: Thermometer, color: "text-amber-400", bg: "bg-amber-500/10" },
-    { label: "SpO2", value: latestVitals?.oxygen_saturation, unit: "%", icon: Wind, color: "text-cyan-400", bg: "bg-cyan-500/10" },
-    { label: "Respiratory", value: latestVitals?.respiratory_rate, unit: "brpm", icon: Droplets, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+    { label: "Blood Pressure", value: latestVitals?.blood_pressure, unit: "mmHg", icon: Activity, color: "text-purple-400", bg: "bg-purple-500/10" },
+    { label: "Sleep", value: latestVitals?.sleep_hours, unit: "hrs", icon: Wind, color: "text-amber-400", bg: "bg-amber-500/10" },
+    { label: "Pain Level", value: latestVitals?.pain_level, unit: "/10", icon: Droplets, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   ];
 
   const chartData = vitals.map((v) => ({
-    time: new Date(v.recorded_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    time: new Date(v.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     heartRate: v.heart_rate,
-    systolic: v.blood_pressure_systolic,
-    diastolic: v.blood_pressure_diastolic,
-    temperature: v.temperature,
-    oxygenSaturation: v.oxygen_saturation,
+    sleepHours: v.sleep_hours,
+    painLevel: v.pain_level,
   }));
 
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-6">
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-colors text-sm"
-        >
-          <ArrowLeft size={16} /> Back to Dashboard
-        </button>
+        <div className="flex justify-between items-center">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-colors text-sm"
+          >
+            <ArrowLeft size={16} /> Back to Dashboard
+          </button>
+          
+          <button
+            onClick={() => navigate(`/log-vitals/${id}`)}
+            className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all shadow-sm"
+          >
+            <Activity size={16} /> Log Vitals
+          </button>
+        </div>
+
+        {aiInsight && (
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 flex gap-4 items-start shadow-sm shadow-purple-500/20 text-white">
+            <div className="bg-white/20 p-2 rounded-lg shrink-0 mt-0.5">
+              <Sparkles size={20} className="text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm mb-0.5 flex items-center gap-2">
+                AI Triage Alert
+              </h3>
+              <p className="text-sm text-indigo-50 leading-relaxed">
+                {aiInsight}
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -297,27 +348,29 @@ export default function PatientDetail() {
 
         {vitals.length > 0 && (
           <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden">
-            <div className="flex items-center border-b border-gray-200">
-              <button
-                onClick={() => setActiveTab("chart")}
-                className={`px-5 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "chart"
-                    ? "text-purple-600 border-b-2 border-purple-500"
-                    : "text-gray-500 hover:text-gray-600"
-                }`}
-              >
-                Charts
-              </button>
-              <button
-                onClick={() => setActiveTab("table")}
-                className={`px-5 py-3 text-sm font-medium transition-colors ${
-                  activeTab === "table"
-                    ? "text-purple-600 border-b-2 border-purple-500"
-                    : "text-gray-500 hover:text-gray-600"
-                }`}
-              >
-                History Table
-              </button>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200">
+              <div className="flex items-center">
+                <button
+                  onClick={() => setActiveTab("chart")}
+                  className={`px-5 py-3 text-sm font-medium transition-colors ${
+                    activeTab === "chart"
+                      ? "text-purple-600 border-b-2 border-purple-500"
+                      : "text-gray-500 hover:text-gray-600"
+                  }`}
+                >
+                  Charts
+                </button>
+                <button
+                  onClick={() => setActiveTab("table")}
+                  className={`px-5 py-3 text-sm font-medium transition-colors ${
+                    activeTab === "table"
+                      ? "text-purple-600 border-b-2 border-purple-500"
+                      : "text-gray-500 hover:text-gray-600"
+                  }`}
+                >
+                  History Table
+                </button>
+              </div>
             </div>
 
             <div className="p-5">
@@ -357,7 +410,7 @@ export default function PatientDetail() {
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-4">Blood Pressure Over Time</h3>
+                    <h3 className="text-sm font-medium text-gray-500 mb-4">Sleep Hours Over Time</h3>
                     <ResponsiveContainer width="100%" height={250}>
                       <LineChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -373,30 +426,22 @@ export default function PatientDetail() {
                         />
                         <Line
                           type="monotone"
-                          dataKey="systolic"
+                          dataKey="sleepHours"
                           stroke="#8b5cf6"
                           strokeWidth={2}
                           dot={{ fill: "#8b5cf6", r: 3 }}
-                          name="Systolic"
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="diastolic"
-                          stroke="#06b6d4"
-                          strokeWidth={2}
-                          dot={{ fill: "#06b6d4", r: 3 }}
-                          name="Diastolic"
+                          name="Sleep Hours"
                         />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-4">Temperature</h3>
+                    <h3 className="text-sm font-medium text-gray-500 mb-4">Pain Level</h3>
                     <ResponsiveContainer width="100%" height={200}>
                       <AreaChart data={chartData}>
                         <defs>
-                          <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
+                          <linearGradient id="painGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2} />
                             <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
                           </linearGradient>
@@ -414,9 +459,9 @@ export default function PatientDetail() {
                         />
                         <Area
                           type="monotone"
-                          dataKey="temperature"
+                          dataKey="painLevel"
                           stroke="#f59e0b"
-                          fill="url(#tempGradient)"
+                          fill="url(#painGradient)"
                           strokeWidth={2}
                           dot={{ fill: "#f59e0b", r: 3 }}
                         />
@@ -431,27 +476,25 @@ export default function PatientDetail() {
                       <tr className="text-gray-500 border-b border-gray-200">
                         <th className="text-left py-3 px-2 font-medium">Date</th>
                         <th className="text-left py-3 px-2 font-medium">Heart Rate</th>
-                        <th className="text-left py-3 px-2 font-medium">BP Systolic</th>
-                        <th className="text-left py-3 px-2 font-medium">BP Diastolic</th>
-                        <th className="text-left py-3 px-2 font-medium">Temp</th>
-                        <th className="text-left py-3 px-2 font-medium">SpO2</th>
-                        <th className="text-left py-3 px-2 font-medium">Resp Rate</th>
+                        <th className="text-left py-3 px-2 font-medium">Blood Pressure</th>
+                        <th className="text-left py-3 px-2 font-medium">Sleep</th>
+                        <th className="text-left py-3 px-2 font-medium">Pain Level</th>
+                        <th className="text-left py-3 px-2 font-medium">Symptoms</th>
                         <th className="text-left py-3 px-2 font-medium">Notes</th>
                       </tr>
                     </thead>
                     <tbody>
                       {vitals.map((v) => (
-                        <tr key={v.id} className="border-b border-gray-200/50 text-gray-600 hover:bg-white/[0.02]">
+                        <tr key={v.log_id} className="border-b border-gray-200/50 text-gray-600 hover:bg-white/[0.02]">
                           <td className="py-3 px-2 text-gray-500">
-                            {new Date(v.recorded_at).toLocaleDateString()}
+                            {new Date(v.created_at).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-2">{v.heart_rate}</td>
-                          <td className="py-3 px-2">{v.blood_pressure_systolic}</td>
-                          <td className="py-3 px-2">{v.blood_pressure_diastolic}</td>
-                          <td className="py-3 px-2">{v.temperature}</td>
-                          <td className="py-3 px-2">{v.oxygen_saturation}</td>
-                          <td className="py-3 px-2">{v.respiratory_rate}</td>
-                          <td className="py-3 px-2 text-gray-500 max-w-[200px] truncate">{v.notes || "-"}</td>
+                          <td className="py-3 px-2">{v.blood_pressure}</td>
+                          <td className="py-3 px-2">{v.sleep_hours} hrs</td>
+                          <td className="py-3 px-2">{v.pain_level}/10</td>
+                          <td className="py-3 px-2 text-gray-500 max-w-[150px] truncate">{v.symptoms || "-"}</td>
+                          <td className="py-3 px-2 text-gray-500 max-w-[150px] truncate">{v.notes || "-"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -466,9 +509,15 @@ export default function PatientDetail() {
           <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-12 text-center">
             <Activity size={40} className="text-gray-600 mx-auto mb-3" />
             <p className="text-gray-500">No vitals recorded yet</p>
-            <p className="text-gray-600 text-sm mt-1">
+            <p className="text-gray-600 text-sm mt-1 mb-5">
               Log vitals to see patient health trends
             </p>
+            <button
+              onClick={() => navigate(`/log-vitals/${id}`)}
+              className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-2 transition-all shadow-sm"
+            >
+              <Activity size={16} /> Log Vitals
+            </button>
           </div>
         )}
 

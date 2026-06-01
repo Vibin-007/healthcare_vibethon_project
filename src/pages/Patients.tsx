@@ -56,6 +56,16 @@ export default function Patients() {
   const confirmRemove = async () => {
     if (!userToDelete) return;
     
+    // Find the patient_id
+    const { data: patData } = await supabase.from("patients").select("patient_id").eq("user_id", userToDelete).single();
+    
+    if (patData?.patient_id) {
+      // Delete all dependent records to satisfy foreign key constraints
+      await supabase.from("health_logs").delete().eq("patient_id", patData.patient_id);
+      await supabase.from("medications").delete().eq("patient_id", patData.patient_id);
+      await supabase.from("ai_insights").delete().eq("patient_id", patData.patient_id);
+    }
+    
     await supabase.from("patients").delete().eq("user_id", userToDelete);
     await supabase.from("users").delete().eq("user_id", userToDelete);
     

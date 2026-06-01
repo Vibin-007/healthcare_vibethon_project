@@ -12,7 +12,8 @@ envFile.split('\n').forEach(line => {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function check() {
-  const { data: patients, error } = await supabase.from('patients').select('name, assigned_doctor_id, assigned_nurse_id');
-  console.log('Patients:', JSON.stringify(patients, null, 2));
+  const { data, error } = await supabase.from('ai_insights').select('*');
+  console.log('Data:', data);
+  console.log('Error:', error);
 }
 check();

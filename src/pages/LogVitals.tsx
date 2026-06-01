@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { generateVitalsInsight } from "../lib/ai";
 import Layout from "../components/Layout";
 import {
   ArrowLeft,
@@ -8,7 +9,6 @@ import {
   Thermometer,
   Wind,
   Droplets,
-  Weight,
   Activity,
   Stethoscope,
   AlertTriangle,
@@ -18,6 +18,7 @@ import {
 interface Patient {
   name: string;
   patient_id: string;
+  disease_condition: string;
 }
 
 export default function LogVitals() {
@@ -30,13 +31,11 @@ export default function LogVitals() {
   const [error, setError] = useState("");
 
   const [vitals, setVitals] = useState({
-    blood_pressure_systolic: "",
-    blood_pressure_diastolic: "",
     heart_rate: "",
-    temperature: "",
-    oxygen_saturation: "",
-    respiratory_rate: "",
-    weight: "",
+    blood_pressure: "",
+    sleep_hours: "",
+    pain_level: "",
+    symptoms: "",
     notes: "",
   });
 
@@ -44,7 +43,7 @@ export default function LogVitals() {
     async function loadPatient() {
       const { data } = await supabase
         .from("patients")
-        .select("name, patient_id")
+        .select("name, patient_id, disease_condition")
         .eq("patient_id", id)
         .single();
       if (data) setPatient(data);
@@ -63,34 +62,65 @@ export default function LogVitals() {
     setError("");
 
     const { data: { session } } = await supabase.auth.getSession();
+    const { data: profile } = await supabase.from("users").select("role").eq("user_id", session?.user?.id).single();
+    
+    let doctor_id = null;
+    let nurse_id = null;
+    
+    if (profile?.role === "doctor") {
+      const { data: dData } = await supabase.from("doctors").select("doctor_id").eq("user_id", session?.user?.id).single();
+      doctor_id = dData?.doctor_id;
+    } else if (profile?.role === "nurse") {
+      const { data: nData } = await supabase.from("nurses").select("nurse_id").eq("user_id", session?.user?.id).single();
+      nurse_id = nData?.nurse_id;
+    }
 
-    const { error: insertError } = await supabase.from("vitals").insert([
+    const { data: insertedLog, error: insertError } = await supabase.from("health_logs").insert([
       {
         patient_id: id,
-        recorded_by: session?.user?.id,
-        blood_pressure_systolic: Number(vitals.blood_pressure_systolic),
-        blood_pressure_diastolic: Number(vitals.blood_pressure_diastolic),
+        doctor_id: doctor_id,
+        nurse_id: nurse_id,
         heart_rate: Number(vitals.heart_rate),
-        temperature: Number(vitals.temperature),
-        oxygen_saturation: Number(vitals.oxygen_saturation),
-        respiratory_rate: Number(vitals.respiratory_rate),
-        weight: Number(vitals.weight) || null,
+        blood_pressure: vitals.blood_pressure,
+        sleep_hours: Number(vitals.sleep_hours),
+        pain_level: Number(vitals.pain_level),
+        symptoms: vitals.symptoms || null,
         notes: vitals.notes || null,
+        log_date: new Date().toISOString().split("T")[0]
       },
-    ]);
+    ]).select().single();
 
     if (insertError) {
       setError(insertError.message);
     } else {
+      // AI Triage Analysis
+      if (insertedLog && patient) {
+        const insightMsg = await generateVitalsInsight({
+          heart_rate: Number(vitals.heart_rate),
+          blood_pressure: vitals.blood_pressure,
+          sleep_hours: Number(vitals.sleep_hours),
+          pain_level: Number(vitals.pain_level),
+          symptoms: vitals.symptoms,
+        }, patient.disease_condition);
+        
+        if (insightMsg) {
+          await supabase.from("ai_insights").insert([
+            {
+              patient_id: id,
+              log_id: insertedLog.log_id,
+              insight_message: insightMsg,
+            }
+          ]);
+        }
+      }
+
       setSuccess(true);
       setVitals({
-        blood_pressure_systolic: "",
-        blood_pressure_diastolic: "",
         heart_rate: "",
-        temperature: "",
-        oxygen_saturation: "",
-        respiratory_rate: "",
-        weight: "",
+        blood_pressure: "",
+        sleep_hours: "",
+        pain_level: "",
+        symptoms: "",
         notes: "",
       });
       setTimeout(() => setSuccess(false), 3000);
@@ -123,13 +153,11 @@ export default function LogVitals() {
   }
 
   const fields = [
-    { key: "heart_rate", label: "Heart Rate", unit: "bpm", icon: HeartPulse, placeholder: "72", color: "text-red-400" },
-    { key: "blood_pressure_systolic", label: "Systolic BP", unit: "mmHg", icon: Activity, placeholder: "120", color: "text-purple-400" },
-    { key: "blood_pressure_diastolic", label: "Diastolic BP", unit: "mmHg", icon: Activity, placeholder: "80", color: "text-purple-400" },
-    { key: "temperature", label: "Temperature", unit: "°F", icon: Thermometer, placeholder: "98.6", color: "text-amber-400" },
-    { key: "oxygen_saturation", label: "Oxygen Saturation", unit: "%", icon: Wind, placeholder: "98", color: "text-cyan-400" },
-    { key: "respiratory_rate", label: "Respiratory Rate", unit: "brpm", icon: Droplets, placeholder: "16", color: "text-emerald-400" },
-    { key: "weight", label: "Weight", unit: "kg", icon: Weight, placeholder: "70", color: "text-gray-500" },
+    { key: "heart_rate", label: "Heart Rate", unit: "bpm", icon: HeartPulse, placeholder: "72", color: "text-red-400", type: "number" },
+    { key: "blood_pressure", label: "Blood Pressure", unit: "mmHg", icon: Activity, placeholder: "120/80", color: "text-purple-400", type: "text" },
+    { key: "sleep_hours", label: "Sleep Hours", unit: "hrs", icon: Wind, placeholder: "8", color: "text-amber-400", type: "number" },
+    { key: "pain_level", label: "Pain Level", unit: "/10", icon: Droplets, placeholder: "3", color: "text-cyan-400", type: "number" },
+    { key: "symptoms", label: "Symptoms", unit: "", icon: Thermometer, placeholder: "Headache, nausea...", color: "text-emerald-400", type: "text" },
   ];
 
   return (
@@ -173,17 +201,19 @@ export default function LogVitals() {
                 </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type={field.type}
                     step="any"
                     placeholder={field.placeholder}
                     value={(vitals as any)[field.key]}
                     onChange={(e) => handleChange(field.key, e.target.value)}
                     className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
-                    required={field.key !== "weight"}
+                    required={field.key !== "symptoms"}
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-600">
-                    {field.unit}
-                  </span>
+                  {field.unit && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-600">
+                      {field.unit}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

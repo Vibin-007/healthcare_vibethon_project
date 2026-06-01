@@ -50,6 +50,17 @@ export default function Nurses() {
   const confirmRemove = async () => {
     if (!userToDelete) return;
     
+    // First find the nurse_id
+    const { data: nurseData } = await supabase.from("nurses").select("nurse_id").eq("user_id", userToDelete).single();
+    
+    if (nurseData?.nurse_id) {
+      // Nullify references in patients table
+      await supabase.from("patients").update({ assigned_nurse_id: null }).eq("assigned_nurse_id", nurseData.nurse_id);
+      
+      // Nullify references in health logs
+      await supabase.from("health_logs").update({ nurse_id: null }).eq("nurse_id", nurseData.nurse_id);
+    }
+    
     await supabase.from("nurses").delete().eq("user_id", userToDelete);
     await supabase.from("users").delete().eq("user_id", userToDelete);
     
