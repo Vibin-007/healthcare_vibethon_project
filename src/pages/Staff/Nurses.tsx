@@ -76,12 +76,14 @@ export default function Nurses() {
     <Layout>
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <HeartPulse className="text-black" size={28} />
-              Nurses Directory
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">Manage and view all registered nurses.</p>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-black text-white rounded-2xl shrink-0 shadow-sm">
+              <HeartPulse size={22} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Nurses Directory</h1>
+              <p className="text-sm text-gray-500 mt-0.5">Manage and view all registered nurses.</p>
+            </div>
           </div>
           
           <div className="flex items-center gap-4 w-full sm:w-auto">
