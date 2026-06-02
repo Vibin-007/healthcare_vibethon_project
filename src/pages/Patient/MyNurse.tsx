@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import Layout from "../../components/Layout";
 import { useAuth } from "../../context/AuthContext";
-import { User, Phone, Mail, MapPin, Briefcase, Calendar, AlertTriangle } from "lucide-react";
+import { User, Phone, Mail, MapPin, Briefcase, Calendar, AlertTriangle, HeartPulse } from "lucide-react";
 
 export default function MyNurse() {
   const { session } = useAuth();
@@ -78,9 +78,14 @@ export default function MyNurse() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Nurse</h1>
-          <p className="text-sm text-gray-500 mt-1">View the details of your assigned primary care nurse.</p>
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-black text-white rounded-2xl shrink-0 shadow-sm">
+            <HeartPulse size={22} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">My Nurse</h1>
+            <p className="text-sm text-gray-500 mt-0.5">View the details of your assigned primary care nurse.</p>
+          </div>
         </div>
 
         {error || !nurseStaff ? (
