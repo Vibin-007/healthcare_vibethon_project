@@ -46,7 +46,7 @@ export default function Login() {
           <div className="p-3.5 bg-black text-white rounded-2xl shadow-md mb-3">
             <Stethoscope size={28} />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Medicare Portal</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Medicare</h1>
           <p className="text-neutral-400 text-xs mt-1">Clinical Decision Support & Vitals Tracking</p>
         </div>
 
