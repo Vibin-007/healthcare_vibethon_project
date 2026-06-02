@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import Layout from "../../components/Layout";
 import ConfirmModal from "../../components/ConfirmModal";
-import { Stethoscope, Search, Trash2, Plus } from "lucide-react";
+import { Stethoscope, Search, Trash2, Plus, Mail, Phone } from "lucide-react";
 
 export default function Doctors() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -108,78 +108,79 @@ export default function Doctors() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-400 uppercase bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th scope="col" className="px-6 py-4 font-medium">Doctor Name</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Email</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Specialization</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Phone Number</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Assigned Patients</th>
-                  <th scope="col" className="px-6 py-4 font-medium text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredDoctors.map((d) => (
-                  <tr key={d.user_id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      Dr. {d.name}
-                    </td>
-                    <td className="px-6 py-4">
-                      {d.email}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        {d.doctors?.[0]?.specialization || "General"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {d.doctors?.[0]?.phone || "N/A"}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {(assignedPatients[d.doctors?.[0]?.doctor_id] || []).length > 0 ? (
-                          assignedPatients[d.doctors?.[0]?.doctor_id].map((pName, idx) => (
-                            <span key={idx} className="bg-gray-50 text-black text-[10px] font-semibold px-2 py-0.5 rounded border border-gray-200">
+        {filteredDoctors.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredDoctors.map((d) => {
+              const docInfo = d.doctors?.[0];
+              const patientsList = assignedPatients[docInfo?.doctor_id] || [];
+              return (
+                <div key={d.user_id} className="bg-white border border-neutral-200/80 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-6 group">
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-neutral-900 text-white font-bold text-lg flex items-center justify-center shadow-sm">
+                          {d.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-neutral-900 group-hover:text-black transition-colors">Dr. {d.name}</h3>
+                          <span className="inline-block text-[10px] font-bold bg-neutral-100 border border-neutral-200 px-2 py-0.5 rounded-md text-neutral-600 uppercase tracking-wider mt-1">
+                            {docInfo?.specialization || "General"}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={() => requestRemove(d.user_id)}
+                        className="text-neutral-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-xl transition-all duration-200 shrink-0"
+                        title="Remove Doctor"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 text-xs text-neutral-500 border-t border-neutral-100 pt-4">
+                      <div className="flex items-center gap-2">
+                        <Mail size={14} className="text-neutral-400" />
+                        <span className="truncate">{d.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone size={14} className="text-neutral-400" />
+                        <span>{docInfo?.phone || "No phone provided"}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2">
+                      <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Assigned Patients ({patientsList.length})</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {patientsList.length > 0 ? (
+                          patientsList.map((pName, idx) => (
+                            <span key={idx} className="bg-neutral-50 text-neutral-700 text-[10px] font-semibold px-2 py-1 rounded-lg border border-neutral-200/60">
                               {pName}
                             </span>
                           ))
                         ) : (
-                          <span className="text-gray-400 text-xs">None</span>
+                          <span className="text-neutral-400 text-xs italic">No patients assigned</span>
                         )}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                      <Link
-                        to={`/staff/${d.user_id}`}
-                        className="text-black hover:text-black font-medium text-sm"
-                      >
-                        View Profile
-                      </Link>
-                      <button
-                        onClick={() => requestRemove(d.user_id)}
-                        className="text-black hover:text-black p-2 hover:bg-gray-50 rounded-lg transition-colors inline-flex items-center"
-                        title="Remove Doctor"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredDoctors.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-gray-400 bg-white">
-                      <Stethoscope size={32} className="mx-auto text-gray-300 mb-3" />
-                      <p>No doctors found matching your search.</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                    </div>
+                  </div>
+
+                  <Link
+                    to={`/staff/${d.user_id}`}
+                    className="w-full text-center bg-neutral-50 hover:bg-black hover:text-white border border-neutral-200 text-neutral-800 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 block"
+                  >
+                    View Profile
+                  </Link>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        ) : (
+          <div className="bg-white border border-neutral-200/80 rounded-3xl p-12 text-center">
+            <Stethoscope size={36} className="mx-auto text-neutral-300 mb-3" />
+            <p className="text-neutral-500 font-medium text-sm">No doctors found matching search criteria.</p>
+          </div>
+        )}
       </div>
       
       <ConfirmModal 
