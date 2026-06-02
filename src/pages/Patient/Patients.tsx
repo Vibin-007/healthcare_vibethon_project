@@ -3,7 +3,7 @@ import { supabase } from "../../lib/supabase";
 import { Link } from "react-router-dom";
 import Layout from "../../components/Layout";
 import ConfirmModal from "../../components/ConfirmModal";
-import { Users, Search, Trash2, Plus } from "lucide-react";
+import { Users, Search, Trash2, Plus, Phone, Activity, HeartPulse, Stethoscope } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Patients() {
@@ -114,74 +114,96 @@ export default function Patients() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-400 uppercase bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th scope="col" className="px-6 py-4 font-medium">Patient Name</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Age & Gender</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Phone Number</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Condition</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Assigned Staff</th>
-                  <th scope="col" className="px-6 py-4 font-medium text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredPatients.map((p) => (
-                  <tr key={p.patient_id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      <Link to={`/patient/${p.patient_id}`} className="hover:text-black transition-colors">
-                        {p.name}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4">
-                      {p.age || "-"} y/o, {p.gender || "Unknown"}
-                    </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {p.phone || "N/A"}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        {p.disease_condition || "Routine"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-xs text-gray-500">
-                      {p.assigned_doctor_id && <div className="text-black font-medium">{doctorMap[p.assigned_doctor_id]}</div>}
-                      {p.assigned_nurse_id && <div className="text-gray-700 font-medium">{nurseMap[p.assigned_nurse_id]}</div>}
-                      {!p.assigned_doctor_id && !p.assigned_nurse_id && <span>Unassigned</span>}
-                    </td>
-                    <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                        <Link
-                          to={`/patient/${p.patient_id}`}
-                          className="text-black hover:text-black font-medium text-sm"
+        {filteredPatients.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPatients.map((p) => {
+              const hasDoctor = !!p.assigned_doctor_id;
+              const hasNurse = !!p.assigned_nurse_id;
+              return (
+                <div key={p.patient_id} className="bg-white border border-neutral-200/80 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-6 group">
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-neutral-900 text-white font-bold text-lg flex items-center justify-center shadow-sm">
+                          {p.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-neutral-900 group-hover:text-black transition-colors">{p.name}</h3>
+                          <span className="inline-block text-[10px] font-bold bg-neutral-100 border border-neutral-200 px-2 py-0.5 rounded-md text-neutral-600 uppercase tracking-wider mt-1">
+                            {p.age || "-"} y/o • {p.gender || "Unknown"}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {profile?.role === "admin" && (
+                        <button
+                          onClick={() => requestRemove(p.user_id)}
+                          className="text-neutral-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-xl transition-all duration-200 shrink-0"
+                          title="Remove Patient"
                         >
-                          View Profile
-                        </Link>
-                        {profile?.role === "admin" && (
-                          <button
-                            onClick={() => requestRemove(p.user_id)}
-                            className="text-black hover:text-black p-2 hover:bg-gray-50 rounded-lg transition-colors inline-flex items-center"
-                            title="Remove Patient"
-                          >
-                            <Trash2 size={18} />
-                          </button>
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="space-y-2 text-xs text-neutral-500 border-t border-neutral-100 pt-4">
+                      <div className="flex items-center gap-2">
+                        <Phone size={14} className="text-neutral-400" />
+                        <span>{p.phone || "No phone provided"}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Activity size={14} className="text-neutral-400" />
+                        <span className="inline-flex items-center px-2 py-0.5 rounded bg-neutral-50 text-neutral-700 border border-neutral-200/60 font-semibold text-[10px]">
+                          {p.disease_condition || "Routine"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t border-neutral-50">
+                      <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Assigned Care Team</p>
+                      <div className="space-y-1 text-xs">
+                        {hasDoctor ? (
+                          <div className="flex items-center gap-1.5 text-neutral-700">
+                            <Stethoscope size={13} className="text-neutral-400" />
+                            <span className="font-medium">{doctorMap[p.assigned_doctor_id]}</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-neutral-400 italic">
+                            <Stethoscope size={13} />
+                            <span>No Doctor assigned</span>
+                          </div>
                         )}
-                    </td>
-                  </tr>
-                ))}
-                {filteredPatients.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-gray-400 bg-white">
-                      <Users size={32} className="mx-auto text-gray-300 mb-3" />
-                      <p>No patients found matching your search.</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                        {hasNurse ? (
+                          <div className="flex items-center gap-1.5 text-neutral-700">
+                            <HeartPulse size={13} className="text-neutral-400" />
+                            <span className="font-medium">{nurseMap[p.assigned_nurse_id]}</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-neutral-400 italic">
+                            <HeartPulse size={13} />
+                            <span>No Nurse assigned</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <Link
+                    to={`/patient/${p.patient_id}`}
+                    className="w-full text-center bg-neutral-50 hover:bg-black hover:text-white border border-neutral-200 text-neutral-800 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 block"
+                  >
+                    View Profile
+                  </Link>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        ) : (
+          <div className="bg-white border border-neutral-200/80 rounded-3xl p-12 text-center">
+            <Users size={36} className="mx-auto text-neutral-300 mb-3" />
+            <p className="text-neutral-500 font-medium text-sm">No patients found matching search criteria.</p>
+          </div>
+        )}
       </div>
       
       <ConfirmModal 
