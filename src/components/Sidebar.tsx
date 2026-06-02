@@ -7,7 +7,6 @@ import {
   HeartPulse,
   LogOut,
   X,
-  PlusSquare,
   Pill
 } from "lucide-react";
 
