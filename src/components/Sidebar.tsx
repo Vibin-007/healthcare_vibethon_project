@@ -53,9 +53,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       >
         <div className="flex items-center justify-between p-6">
           <div className="flex items-center gap-3">
-            <div className="p-1.5 bg-gray-900 rounded-md">
-              <PlusSquare size={20} className="text-white" />
-            </div>
+            <div className="p-2 bg-black/20 rounded-lg text-black">
+            <Stethoscope size={24} />
+          </div>
             <h1 className="text-xl font-bold text-gray-900 tracking-tight">Medicare</h1>
           </div>
           <button onClick={onClose} className="lg:hidden text-gray-500 hover:text-gray-900 transition-colors">
@@ -91,7 +91,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <div className="p-4 border-t border-gray-200 space-y-1">
           <button
             onClick={signOut}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:text-black hover:bg-gray-50 transition-all w-full"
           >
             <LogOut size={18} />
             Logout

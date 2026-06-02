@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
-import { generateVitalsInsight } from "../lib/ai";
-import Layout from "../components/Layout";
+import { supabase } from "../../lib/supabase";
+import { generateVitalsInsight } from "../../lib/ai";
+import Layout from "../../components/Layout";
 import {
   ArrowLeft,
   HeartPulse,
@@ -132,7 +132,7 @@ export default function LogVitals() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[80vh]">
-          <div className="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-2 border-black border-t-transparent rounded-full animate-spin" />
         </div>
       </Layout>
     );
@@ -144,7 +144,7 @@ export default function LogVitals() {
         <div className="text-center py-16">
           <AlertTriangle size={40} className="text-gray-600 mx-auto mb-3" />
           <p className="text-gray-500">Patient not found</p>
-          <button onClick={() => navigate("/dashboard")} className="text-purple-600 hover:text-purple-600 text-sm mt-2 transition-colors">
+          <button onClick={() => navigate("/dashboard")} className="text-black hover:text-black text-sm mt-2 transition-colors">
             Back to Dashboard
           </button>
         </div>
@@ -153,11 +153,11 @@ export default function LogVitals() {
   }
 
   const fields = [
-    { key: "heart_rate", label: "Heart Rate", unit: "bpm", icon: HeartPulse, placeholder: "72", color: "text-red-400", type: "number" },
-    { key: "blood_pressure", label: "Blood Pressure", unit: "mmHg", icon: Activity, placeholder: "120/80", color: "text-purple-400", type: "text" },
+    { key: "heart_rate", label: "Heart Rate", unit: "bpm", icon: HeartPulse, placeholder: "72", color: "text-gray-600", type: "number" },
+    { key: "blood_pressure", label: "Blood Pressure", unit: "mmHg", icon: Activity, placeholder: "120/80", color: "text-gray-600", type: "text" },
     { key: "sleep_hours", label: "Sleep Hours", unit: "hrs", icon: Wind, placeholder: "8", color: "text-amber-400", type: "number" },
     { key: "pain_level", label: "Pain Level", unit: "/10", icon: Droplets, placeholder: "3", color: "text-cyan-400", type: "number" },
-    { key: "symptoms", label: "Symptoms", unit: "", icon: Thermometer, placeholder: "Headache, nausea...", color: "text-emerald-400", type: "text" },
+    { key: "symptoms", label: "Symptoms", unit: "", icon: Thermometer, placeholder: "Headache, nausea...", color: "text-gray-600", type: "text" },
   ];
 
   return (
@@ -172,8 +172,8 @@ export default function LogVitals() {
 
         <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 bg-purple-600/10 rounded-lg">
-              <Stethoscope size={20} className="text-purple-600" />
+            <div className="p-2 bg-black/10 rounded-lg">
+              <Stethoscope size={20} className="text-black" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Log Vitals</h1>
@@ -185,9 +185,9 @@ export default function LogVitals() {
         </div>
 
         {success && (
-          <div className="flex items-center gap-2 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-            <CheckCircle2 size={18} className="text-emerald-400" />
-            <p className="text-emerald-400 text-sm font-medium">Vitals recorded successfully!</p>
+          <div className="flex items-center gap-2 p-4 bg-black/10 border border-black/20 rounded-xl">
+            <CheckCircle2 size={18} className="text-gray-600" />
+            <p className="text-gray-600 text-sm font-medium">Vitals recorded successfully!</p>
           </div>
         )}
 
@@ -206,7 +206,7 @@ export default function LogVitals() {
                     placeholder={field.placeholder}
                     value={(vitals as any)[field.key]}
                     onChange={(e) => handleChange(field.key, e.target.value)}
-                    className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+                    className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-black focus:ring-1 focus:ring-black/50 transition-all placeholder:text-gray-600"
                     required={field.key !== "symptoms"}
                   />
                   {field.unit && (
@@ -226,20 +226,20 @@ export default function LogVitals() {
               value={vitals.notes}
               onChange={(e) => handleChange("notes", e.target.value)}
               rows={3}
-              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600 resize-none"
+              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-black focus:ring-1 focus:ring-black/50 transition-all placeholder:text-gray-600 resize-none"
             />
           </div>
 
           {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <p className="text-red-400 text-sm">{error}</p>
+            <div className="p-3 bg-gray-800/10 border border-gray-800/20 rounded-lg">
+              <p className="text-gray-600 text-sm">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-2.5 rounded-lg transition-all shadow-lg shadow-black/25 hover:shadow-black/40 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? "Saving..." : "Record Vitals"}
           </button>

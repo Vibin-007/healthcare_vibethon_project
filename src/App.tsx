@@ -2,19 +2,19 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import PatientDetail from "./pages/PatientDetail";
-import LogVitals from "./pages/LogVitals";
-import AddPatient from "./pages/AddPatient";
+import Login from "./pages/Auth/Login";
+import PatientDetail from "./pages/Patient/PatientDetail";
+import LogVitals from "./pages/Patient/LogVitals";
+import AddPatient from "./pages/Staff/AddPatient";
 import Dashboard from "./pages/Dashboard";
-import AddUser from "./pages/AddUser";
-import Patients from "./pages/Patients";
-import Doctors from "./pages/Doctors";
-import Nurses from "./pages/Nurses";
-import StaffDetail from "./pages/StaffDetail";
-import MyMedications from "./pages/MyMedications";
-import MyDoctor from "./pages/MyDoctor";
-import MyNurse from "./pages/MyNurse";
+import AddUser from "./pages/Staff/AddUser";
+import Patients from "./pages/Patient/Patients";
+import Doctors from "./pages/Staff/Doctors";
+import Nurses from "./pages/Staff/Nurses";
+import StaffDetail from "./pages/Staff/StaffDetail";
+import MyMedications from "./pages/Patient/MyMedications";
+import MyDoctor from "./pages/Patient/MyDoctor";
+import MyNurse from "./pages/Patient/MyNurse";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();

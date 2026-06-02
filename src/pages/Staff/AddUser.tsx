@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { supabase, supabaseAdminClient } from "../lib/supabase";
+import { supabase, supabaseAdminClient } from "../../lib/supabase";
 import { useNavigate } from "react-router-dom";
-import Layout from "../components/Layout";
+import Layout from "../../components/Layout";
 import {
   ArrowLeft,
   User,
@@ -145,8 +145,8 @@ export default function AddUser({ role }: AddUserProps) {
 
         <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 bg-purple-600/10 rounded-lg">
-              <Icon size={20} className="text-purple-600" />
+            <div className="p-2 bg-black/10 rounded-lg">
+              <Icon size={20} className="text-black" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">{title}</h1>
@@ -156,24 +156,24 @@ export default function AddUser({ role }: AddUserProps) {
         </div>
 
         {success && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6 space-y-4">
+          <div className="bg-black/10 border border-black/20 rounded-xl p-6 space-y-4">
             <div className="flex items-center gap-2">
-              <CheckCircle2 size={24} className="text-emerald-500" />
-              <h3 className="text-emerald-700 text-lg font-semibold">{role.charAt(0).toUpperCase() + role.slice(1)} account created successfully!</h3>
+              <CheckCircle2 size={24} className="text-black" />
+              <h3 className="text-black text-lg font-semibold">{role.charAt(0).toUpperCase() + role.slice(1)} account created successfully!</h3>
             </div>
-            <p className="text-emerald-600 text-sm">
+            <p className="text-gray-700 text-sm">
               The account has been created. You can now securely email them their login credentials.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={handleEmailCredentials}
-                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="flex items-center justify-center gap-2 bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 <Mail size={16} /> Email Credentials
               </button>
               <button
                 onClick={() => navigate(role === "doctor" ? "/doctors" : "/nurses")}
-                className="flex items-center justify-center gap-2 bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="flex items-center justify-center gap-2 bg-white border border-gray-200 text-black hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 Return to Directory
               </button>
@@ -185,42 +185,42 @@ export default function AddUser({ role }: AddUserProps) {
           <form onSubmit={handleSubmit} className="bg-white shadow-sm border border-gray-200 rounded-xl p-6 space-y-5">
           <div>
             <label className="flex items-center gap-1.5 text-sm text-gray-500 mb-1.5">
-              <User size={14} className="text-gray-500" /> Full Name <span className="text-red-400">*</span>
+              <User size={14} className="text-gray-500" /> Full Name <span className="text-gray-600">*</span>
             </label>
             <input
               type="text"
               placeholder="John Doe"
               value={form.name}
               onChange={(e) => handleChange("name", e.target.value)}
-              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-black focus:ring-1 focus:ring-black/50 transition-all placeholder:text-gray-600"
               required
             />
           </div>
 
           <div>
             <label className="flex items-center gap-1.5 text-sm text-gray-500 mb-1.5">
-              <Mail size={14} className="text-gray-500" /> Email Address <span className="text-red-400">*</span>
+              <Mail size={14} className="text-gray-500" /> Email Address <span className="text-gray-600">*</span>
             </label>
             <input
               type="email"
               placeholder="doctor@example.com"
               value={form.email}
               onChange={(e) => handleChange("email", e.target.value)}
-              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-black focus:ring-1 focus:ring-black/50 transition-all placeholder:text-gray-600"
               required
             />
           </div>
 
           <div>
             <label className="flex items-center gap-1.5 text-sm text-gray-500 mb-1.5">
-              <Lock size={14} className="text-gray-500" /> Password <span className="text-red-400">*</span>
+              <Lock size={14} className="text-gray-500" /> Password <span className="text-gray-600">*</span>
             </label>
             <input
               type="password"
               placeholder="Create a strong password"
               value={form.password}
               onChange={(e) => handleChange("password", e.target.value)}
-              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-black focus:ring-1 focus:ring-black/50 transition-all placeholder:text-gray-600"
               required
               minLength={6}
             />
@@ -235,7 +235,7 @@ export default function AddUser({ role }: AddUserProps) {
               placeholder="+1 (555) 123-4567"
               value={form.phone}
               onChange={(e) => handleChange("phone", e.target.value)}
-              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-black focus:ring-1 focus:ring-black/50 transition-all placeholder:text-gray-600"
             />
           </div>
 
@@ -248,7 +248,7 @@ export default function AddUser({ role }: AddUserProps) {
               placeholder="123 Medical Center Dr."
               value={form.address}
               onChange={(e) => handleChange("address", e.target.value)}
-              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+              className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-black focus:ring-1 focus:ring-black/50 transition-all placeholder:text-gray-600"
             />
           </div>
 
@@ -262,22 +262,22 @@ export default function AddUser({ role }: AddUserProps) {
                 placeholder="e.g. Cardiology"
                 value={form.specialization}
                 onChange={(e) => handleChange("specialization", e.target.value)}
-                className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+                className="w-full bg-[#f8fafc] border border-gray-200 text-gray-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-black focus:ring-1 focus:ring-black/50 transition-all placeholder:text-gray-600"
               />
             </div>
           )}
 
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <AlertCircle size={16} className="text-red-400" />
-              <p className="text-red-400 text-sm">{error}</p>
+            <div className="flex items-center gap-2 p-3 bg-gray-800/10 border border-gray-800/20 rounded-lg">
+              <AlertCircle size={16} className="text-gray-600" />
+              <p className="text-gray-600 text-sm">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-2.5 rounded-lg transition-all shadow-lg shadow-black/25 hover:shadow-black/40 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? "Creating..." : title}
           </button>

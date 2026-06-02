@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
-import Layout from "../components/Layout";
+import { supabase } from "../../lib/supabase";
+import Layout from "../../components/Layout";
 import { User, Phone, Mail, MapPin, Briefcase, ArrowLeft, Calendar, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -46,7 +46,7 @@ export default function StaffDetail() {
     return (
       <Layout>
         <div className="flex justify-center items-center h-64">
-          <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
         </div>
       </Layout>
     );
@@ -57,7 +57,7 @@ export default function StaffDetail() {
       <Layout>
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900">User not found</h2>
-          <button onClick={() => navigate(-1)} className="mt-4 text-purple-600 hover:underline">
+          <button onClick={() => navigate(-1)} className="mt-4 text-black hover:underline">
             Go back
           </button>
         </div>
@@ -81,7 +81,7 @@ export default function StaffDetail() {
         <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-purple-600/20 flex items-center justify-center text-purple-600 text-2xl font-bold">
+              <div className="w-16 h-16 rounded-full bg-black/20 flex items-center justify-center text-black text-2xl font-bold">
                 {staff.name.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -102,7 +102,7 @@ export default function StaffDetail() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold bg-purple-600/10 border border-purple-200 px-3 py-1.5 rounded-full text-purple-600 capitalize">
+              <span className="text-xs font-semibold bg-black/10 border border-gray-200 px-3 py-1.5 rounded-full text-black capitalize">
                 {staff.role}
               </span>
             </div>
@@ -150,10 +150,10 @@ export default function StaffDetail() {
         <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden mt-6">
           <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-gray-50/50">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Users size={20} className="text-purple-600" />
+              <Users size={20} className="text-black" />
               Assigned Patients
             </h2>
-            <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold">
+            <span className="bg-gray-100 text-black px-3 py-1 rounded-full text-xs font-bold">
               {assignedPatients.length} Total
             </span>
           </div>
@@ -183,7 +183,7 @@ export default function StaffDetail() {
                         <td className="px-6 py-4 text-right">
                           <Link
                             to={`/patient/${p.patient_id}`}
-                            className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+                            className="text-black hover:text-black font-medium text-sm"
                           >
                             View Profile
                           </Link>

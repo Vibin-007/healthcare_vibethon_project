@@ -13,7 +13,7 @@ export default function Dashboard() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[80vh]">
-          <div className="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-2 border-black border-t-transparent rounded-full animate-spin" />
         </div>
       </Layout>
     );

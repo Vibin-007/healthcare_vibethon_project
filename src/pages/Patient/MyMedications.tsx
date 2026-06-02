@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
-import Layout from "../components/Layout";
-import { useAuth } from "../context/AuthContext";
+import { supabase } from "../../lib/supabase";
+import Layout from "../../components/Layout";
+import { useAuth } from "../../context/AuthContext";
 import { Pill, Activity, AlertTriangle } from "lucide-react";
 
 interface Medication {
@@ -62,7 +62,7 @@ export default function MyMedications() {
     return (
       <Layout>
         <div className="flex justify-center items-center h-64">
-          <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
         </div>
       </Layout>
     );
@@ -77,7 +77,7 @@ export default function MyMedications() {
         </div>
 
         {error ? (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-2">
+          <div className="bg-gray-50 border border-red-200 text-black px-4 py-3 rounded-lg flex items-center gap-2">
             <AlertTriangle size={18} />
             <p className="text-sm font-medium">{error}</p>
           </div>
@@ -85,7 +85,7 @@ export default function MyMedications() {
           <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden">
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-gray-50/50">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <Pill size={20} className="text-purple-600" />
+                <Pill size={20} className="text-black" />
                 Current Prescriptions
               </h2>
             </div>
@@ -106,8 +106,8 @@ export default function MyMedications() {
                       {medications.map((med) => (
                         <tr key={med.medication_id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
                           <td className="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
-                              <Pill size={14} className="text-purple-600" />
+                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                              <Pill size={14} className="text-black" />
                             </div>
                             {med.medicine_name}
                           </td>

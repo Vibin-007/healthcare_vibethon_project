@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
-import Layout from "../components/Layout";
-import { useAuth } from "../context/AuthContext";
+import { supabase } from "../../lib/supabase";
+import Layout from "../../components/Layout";
+import { useAuth } from "../../context/AuthContext";
 import { User, Phone, Mail, MapPin, Briefcase, Calendar, AlertTriangle } from "lucide-react";
 
 export default function MyDoctor() {
@@ -69,7 +69,7 @@ export default function MyDoctor() {
     return (
       <Layout>
         <div className="flex justify-center items-center h-64">
-          <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
         </div>
       </Layout>
     );
@@ -93,7 +93,7 @@ export default function MyDoctor() {
             <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-purple-600/20 flex items-center justify-center text-purple-600 text-2xl font-bold">
+                  <div className="w-16 h-16 rounded-full bg-black/20 flex items-center justify-center text-black text-2xl font-bold">
                     {doctorStaff.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
@@ -114,7 +114,7 @@ export default function MyDoctor() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold bg-purple-600/10 border border-purple-200 px-3 py-1.5 rounded-full text-purple-600 capitalize">
+                  <span className="text-xs font-semibold bg-black/10 border border-gray-200 px-3 py-1.5 rounded-full text-black capitalize">
                     {doctorStaff.role}
                   </span>
                 </div>

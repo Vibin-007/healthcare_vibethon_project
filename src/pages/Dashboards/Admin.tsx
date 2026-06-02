@@ -38,13 +38,13 @@ export default function AdminDashboard() {
       });
 
       if (recentPatientsRes.data) {
-        setPatients(recentPatientsRes.data);
+        setPatients(recentPatientsRes.data.filter((p: any) => !p.name.toLowerCase().includes("test")));
       }
       if (recentDoctorsRes.data) {
-        setRecentDoctors(recentDoctorsRes.data);
+        setRecentDoctors(recentDoctorsRes.data.filter((d: any) => !d.name.toLowerCase().includes("test")));
       }
       if (recentNursesRes.data) {
-        setRecentNurses(recentNursesRes.data);
+        setRecentNurses(recentNursesRes.data.filter((n: any) => !n.name.toLowerCase().includes("test")));
       }
       
       const uMap = (allUsersRes.data || []).reduce((acc: any, u: any) => ({ ...acc, [u.user_id]: u.name }), {});
@@ -109,19 +109,19 @@ export default function AdminDashboard() {
           <div className="flex bg-gray-50 rounded-lg p-1 border border-gray-200 self-start sm:self-auto">
             <button 
               onClick={() => setActiveTab('patients')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'patients' ? 'bg-white text-purple-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'patients' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Patients
             </button>
             <button 
               onClick={() => setActiveTab('doctors')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'doctors' ? 'bg-white text-purple-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'doctors' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Doctors
             </button>
             <button 
               onClick={() => setActiveTab('nurses')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'nurses' ? 'bg-white text-purple-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'nurses' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Nurses
             </button>
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
                 {patients.map((p) => (
                   <tr key={p.patient_id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
                     <td className="px-4 py-4 font-medium text-gray-900">
-                      <Link to={`/patient/${p.patient_id}`} className="hover:text-purple-600 transition-colors">
+                      <Link to={`/patient/${p.patient_id}`} className="hover:text-black transition-colors">
                         {p.name}
                       </Link>
                     </td>
@@ -156,8 +156,8 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td className="px-4 py-4 text-xs text-gray-500">
-                      {p.assigned_doctor_id && <div className="text-purple-600 font-medium">{doctorMap[p.assigned_doctor_id]}</div>}
-                      {p.assigned_nurse_id && <div className="text-emerald-600 font-medium">{nurseMap[p.assigned_nurse_id]}</div>}
+                      {p.assigned_doctor_id && <div className="text-black font-medium">{doctorMap[p.assigned_doctor_id]}</div>}
+                      {p.assigned_nurse_id && <div className="text-gray-700 font-medium">{nurseMap[p.assigned_nurse_id]}</div>}
                       {!p.assigned_doctor_id && !p.assigned_nurse_id && <span>Unassigned</span>}
                     </td>
                     <td className="px-4 py-4 text-gray-500">
@@ -166,7 +166,7 @@ export default function AdminDashboard() {
                     <td className="px-4 py-4 text-right">
                       <Link
                         to={`/patient/${p.patient_id}`}
-                        className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+                        className="text-black hover:text-black font-medium text-sm"
                       >
                         View Profile
                       </Link>
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
                 {recentDoctors.map((d) => (
                   <tr key={d.user_id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
                     <td className="px-4 py-4 font-medium text-gray-900">
-                      <Link to={`/staff/${d.user_id}`} className="hover:text-purple-600 transition-colors">
+                      <Link to={`/staff/${d.user_id}`} className="hover:text-black transition-colors">
                         Dr. {d.name}
                       </Link>
                     </td>
@@ -215,7 +215,7 @@ export default function AdminDashboard() {
                     <td className="px-4 py-4 text-right">
                       <Link
                         to={`/staff/${d.user_id}`}
-                        className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+                        className="text-black hover:text-black font-medium text-sm"
                       >
                         View Profile
                       </Link>
@@ -248,7 +248,7 @@ export default function AdminDashboard() {
                 {recentNurses.map((n) => (
                   <tr key={n.user_id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
                     <td className="px-4 py-4 font-medium text-gray-900">
-                      <Link to={`/staff/${n.user_id}`} className="hover:text-purple-600 transition-colors">
+                      <Link to={`/staff/${n.user_id}`} className="hover:text-black transition-colors">
                         {n.name}
                       </Link>
                     </td>
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
                     <td className="px-4 py-4 text-right">
                       <Link
                         to={`/staff/${n.user_id}`}
-                        className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+                        className="text-black hover:text-black font-medium text-sm"
                       >
                         View Profile
                       </Link>

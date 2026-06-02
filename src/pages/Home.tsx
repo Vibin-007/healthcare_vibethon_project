@@ -9,14 +9,14 @@ export default function Home() {
     <div className="min-h-screen bg-[#f8fafc] text-gray-900">
       <nav className="border-b border-gray-200 bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-600/20 rounded-lg text-purple-600">
+          <div className="p-2 bg-black/20 rounded-lg text-black">
             <Stethoscope size={24} />
           </div>
           <span className="text-xl font-bold tracking-wide">MediCare Hospital</span>
         </div>
         <button
           onClick={() => navigate("/login")}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg font-semibold transition-all shadow-lg shadow-purple-500/20 text-sm"
+          className="bg-black hover:bg-gray-800 text-white px-5 py-2 rounded-lg font-semibold transition-all shadow-lg shadow-black/20 text-sm"
         >
           Login
         </button>
@@ -26,7 +26,7 @@ export default function Home() {
         <div className="text-center space-y-6 max-w-3xl mx-auto">
           <h1 className="text-5xl md:text-6xl font-bold leading-tight">
             Advanced Healthcare, <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-600 to-gray-800">
               Compassionate Care
             </span>
           </h1>
@@ -36,24 +36,24 @@ export default function Home() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-white shadow-sm border border-gray-200 p-8 rounded-2xl hover:border-purple-300 transition-colors">
-            <Shield className="text-purple-600 mb-5" size={36} />
+          <div className="bg-white shadow-sm border border-gray-200 p-8 rounded-2xl hover:border-gray-400 transition-colors">
+            <Shield className="text-black mb-5" size={36} />
             <h3 className="text-xl font-bold mb-3">Excellence in Care</h3>
             <p className="text-gray-500 text-sm leading-relaxed">
               Top-tier medical professionals and advanced diagnostic tools to ensure the best patient outcomes and personalized treatment plans.
             </p>
           </div>
           
-          <div className="bg-white shadow-sm border border-gray-200 p-8 rounded-2xl hover:border-purple-300 transition-colors">
-            <Clock className="text-purple-600 mb-5" size={36} />
+          <div className="bg-white shadow-sm border border-gray-200 p-8 rounded-2xl hover:border-gray-400 transition-colors">
+            <Clock className="text-black mb-5" size={36} />
             <h3 className="text-xl font-bold mb-3">24/7 Monitoring</h3>
             <p className="text-gray-500 text-sm leading-relaxed">
               Continuous patient monitoring systems and round-the-clock emergency support for ultimate peace of mind.
             </p>
           </div>
 
-          <div className="bg-white shadow-sm border border-gray-200 p-8 rounded-2xl hover:border-purple-300 transition-colors">
-            <HeartPulse className="text-purple-600 mb-5" size={36} />
+          <div className="bg-white shadow-sm border border-gray-200 p-8 rounded-2xl hover:border-gray-400 transition-colors">
+            <HeartPulse className="text-black mb-5" size={36} />
             <h3 className="text-xl font-bold mb-3">Patient Portal</h3>
             <p className="text-gray-500 text-sm leading-relaxed">
               Seamless access to track daily vitals, view AI-generated health insights, and manage medical records securely.

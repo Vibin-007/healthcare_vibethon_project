@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../../lib/supabase";
 import { useNavigate } from "react-router-dom";
 import { Stethoscope, Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 
@@ -29,7 +29,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-black/5 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md p-8 rounded-2xl border border-gray-200 bg-white shadow-sm/60 backdrop-blur-xl shadow-2xl relative z-10">
@@ -41,8 +41,8 @@ export default function Login() {
         </button>
 
         <div className="flex flex-col items-center text-center mb-8 mt-2">
-          <div className="p-3 bg-purple-600/20 rounded-xl border border-purple-200 mb-3">
-            <Stethoscope size={32} className="text-purple-600" />
+          <div className="p-3 bg-black/20 rounded-xl border border-gray-200 mb-3">
+            <Stethoscope size={32} className="text-black" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-wide">MediCare</h1>
           <p className="text-gray-500 text-xs mt-1">Comprehensive Healthcare Management System</p>
@@ -63,7 +63,7 @@ export default function Login() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white shadow-sm border border-gray-200 text-gray-900 pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+                className="w-full bg-white shadow-sm border border-gray-200 text-gray-900 pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-black focus:ring-1 focus:ring-black/50 transition-all placeholder:text-gray-600"
                 required
               />
             </div>
@@ -78,7 +78,7 @@ export default function Login() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-white shadow-sm border border-gray-200 text-gray-900 pl-10 pr-10 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all placeholder:text-gray-600"
+                className="w-full bg-white shadow-sm border border-gray-200 text-gray-900 pl-10 pr-10 py-2.5 rounded-lg focus:outline-none focus:border-black focus:ring-1 focus:ring-black/50 transition-all placeholder:text-gray-600"
                 required
               />
               <button
@@ -92,15 +92,15 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <p className="text-red-400 text-sm">{error}</p>
+            <div className="p-3 bg-gray-800/10 border border-gray-800/20 rounded-lg">
+              <p className="text-gray-600 text-sm">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-2.5 rounded-lg transition-all shadow-lg shadow-black/25 hover:shadow-black/40 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>

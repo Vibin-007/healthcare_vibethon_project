@@ -74,3 +74,91 @@ export async function generateVitalsInsight(vitals: VitalsData, condition: strin
 
   return null;
 }
+
+export interface HistoricalLog {
+  sleep_hours: number;
+  pain_level: number;
+  heart_rate: number;
+  blood_pressure: string;
+  created_at: string;
+}
+
+export function detectImpendingHealthDip(logs: HistoricalLog[]): string | null {
+  if (logs.length < 2) return null;
+  
+  // Sort logs by date descending (newest first)
+  const sorted = [...logs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  
+  const current = sorted[0];
+  const previous = sorted[1];
+  
+  const sleepDrop = previous.sleep_hours - current.sleep_hours;
+  const painUptick = current.pain_level - previous.pain_level;
+  
+  if (sleepDrop >= 1 && painUptick >= 2) {
+    return `⚠️ Impending Health Dip Flagged: A drop of ${sleepDrop.toFixed(1)} sleep hours combined with an uptick of ${painUptick} in pain level suggests a potential health decline. We recommend scheduling an early check-in or adjusting therapy.`;
+  }
+  
+  return null;
+}
+
+export interface SmartReminder {
+  medicine_name: string;
+  original_time: string;
+  adjusted_time: string;
+  reason: string;
+  priority: "high" | "normal";
+}
+
+export function getSmartMedicationReminders(medications: any[], latestLog: any): SmartReminder[] {
+  if (!latestLog) return [];
+  
+  const sleep = latestLog.sleep_hours;
+  const pain = latestLog.pain_level;
+  
+  return medications.map(med => {
+    let originalTime = "08:00 AM";
+    let adjustedTime = "08:00 AM";
+    let reason = "Scheduled on standard wake pattern.";
+    let priority: "high" | "normal" = "normal";
+    
+    const nameLower = med.medicine_name.toLowerCase();
+    
+    // Set standard times based on frequency
+    if (med.frequency.toLowerCase().includes("night") || med.frequency.toLowerCase().includes("evening") || med.frequency.toLowerCase().includes("pm")) {
+      originalTime = "09:00 PM";
+      adjustedTime = "09:00 PM";
+    }
+    
+    // Adjust based on sleep pattern (Feature 4)
+    if (sleep < 6) {
+      if (originalTime.includes("AM")) {
+        adjustedTime = "09:30 AM";
+        reason = `Delayed by 1.5 hours due to poor sleep (${sleep} hrs) to reduce stomach irritation and coordinate with delayed breakfast.`;
+        priority = "high";
+      } else {
+        adjustedTime = "08:30 PM";
+        reason = `Advanced by 30 mins to allow earlier rest after poor sleep.`;
+      }
+    } else if (sleep > 9) {
+      if (originalTime.includes("AM")) {
+        adjustedTime = "10:00 AM";
+        reason = `Shifted later by 2 hours due to prolonged sleep (${sleep} hrs) to align with actual waking time.`;
+      }
+    }
+    
+    // Prioritize high-risk meds if pain is high
+    if (pain > 6 && (nameLower.includes("pain") || nameLower.includes("para") || nameLower.includes("ibu") || nameLower.includes("aspirin"))) {
+      priority = "high";
+      reason = `Priority elevated: Current pain level is high (${pain}/10). Take promptly with food.`;
+    }
+    
+    return {
+      medicine_name: med.medicine_name,
+      original_time: originalTime,
+      adjusted_time: adjustedTime,
+      reason,
+      priority
+    };
+  });
+}

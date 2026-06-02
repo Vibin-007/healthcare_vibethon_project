@@ -71,7 +71,7 @@ export default function NurseDashboard() {
         <div className="flex justify-between items-center bg-white shadow-sm border border-gray-200 rounded-xl p-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <HeartPulse className="text-emerald-600" size={28} />
+              <HeartPulse className="text-gray-700" size={28} />
               Welcome, Nurse
             </h1>
             <p className="text-gray-500 mt-1">Here is the status of your assigned patients today.</p>
@@ -79,25 +79,25 @@ export default function NurseDashboard() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /></div>
+          <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" /></div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* AI Alerts Column */}
             <div className="lg:col-span-1 space-y-4">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <Sparkles size={18} className="text-indigo-500" />
+                <Sparkles size={18} className="text-black" />
                 AI Triage Alerts
               </h2>
               
               {alerts.length > 0 ? (
                 <div className="space-y-4">
                   {alerts.map((alert, i) => (
-                    <div key={i} className="bg-gradient-to-br from-indigo-500 to-emerald-600 rounded-xl p-4 text-white shadow-md shadow-emerald-500/20">
+                    <div key={i} className="bg-black rounded-xl p-4 text-white shadow-md shadow-black/10">
                       <div className="flex items-center gap-2 mb-2 font-semibold">
-                        <AlertTriangle size={16} className="text-yellow-300" />
+                        <AlertTriangle size={16} className="text-black" />
                         {alert.name}
                       </div>
-                      <p className="text-sm text-indigo-50 leading-relaxed mb-3">
+                      <p className="text-sm text-gray-100 leading-relaxed mb-3">
                         {alert.insight}
                       </p>
                       <Link to={`/patient/${alert.patient_id}`} className="inline-block bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
@@ -108,8 +108,8 @@ export default function NurseDashboard() {
                 </div>
               ) : (
                 <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-8 text-center">
-                  <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Activity className="text-emerald-500" size={24} />
+                  <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Activity className="text-black" size={24} />
                   </div>
                   <p className="text-gray-900 font-medium">All Stable</p>
                   <p className="text-sm text-gray-500 mt-1">No critical AI alerts for your patients at this time.</p>
@@ -120,7 +120,7 @@ export default function NurseDashboard() {
             {/* Patients Column */}
             <div className="lg:col-span-2 space-y-4">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <Activity size={18} className="text-emerald-600" />
+                <Activity size={18} className="text-gray-700" />
                 My Assigned Patients ({patients.length})
               </h2>
               
@@ -133,7 +133,7 @@ export default function NurseDashboard() {
                           <h3 className="text-gray-900 font-semibold">{p.name}</h3>
                           <p className="text-sm text-gray-500 mt-0.5">{p.disease_condition || "Pending Diagnosis"}</p>
                         </div>
-                        <Link to={`/patient/${p.patient_id}`} className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
+                        <Link to={`/patient/${p.patient_id}`} className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-black rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
                           <FileText size={16}/> View Profile
                         </Link>
                       </div>

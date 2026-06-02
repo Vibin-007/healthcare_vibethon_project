@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../../lib/supabase";
 import { Link } from "react-router-dom";
-import Layout from "../components/Layout";
-import ConfirmModal from "../components/ConfirmModal";
+import Layout from "../../components/Layout";
+import ConfirmModal from "../../components/ConfirmModal";
 import { Users, Search, Trash2, Plus } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Patients() {
   const { profile, session } = useAuth();
@@ -74,7 +74,7 @@ export default function Patients() {
   };
 
   const filteredPatients = patients.filter(
-    (p) => p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()) && !p.name.toLowerCase().includes("test")
   );
 
   return (
@@ -83,7 +83,7 @@ export default function Patients() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Users className="text-purple-600" size={28} />
+              <Users className="text-black" size={28} />
               Patients Directory
             </h1>
             <p className="text-sm text-gray-500 mt-1">Manage and view all registered patients.</p>
@@ -97,14 +97,14 @@ export default function Patients() {
                 placeholder="Search patients by name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-sm placeholder:text-gray-400 text-gray-900 transition-all shadow-sm"
+                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/20 text-sm placeholder:text-gray-400 text-gray-900 transition-all shadow-sm"
               />
             </div>
             
             {profile?.role === "admin" && (
               <Link 
                 to="/add-patient" 
-                className="shrink-0 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-sm"
+                className="shrink-0 bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-sm"
               >
                 <Plus size={16} /> Add Patient
               </Link>
@@ -129,7 +129,7 @@ export default function Patients() {
                 {filteredPatients.map((p) => (
                   <tr key={p.patient_id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 font-medium text-gray-900">
-                      <Link to={`/patient/${p.patient_id}`} className="hover:text-purple-600 transition-colors">
+                      <Link to={`/patient/${p.patient_id}`} className="hover:text-black transition-colors">
                         {p.name}
                       </Link>
                     </td>
@@ -145,21 +145,21 @@ export default function Patients() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-xs text-gray-500">
-                      {p.assigned_doctor_id && <div className="text-purple-600 font-medium">{doctorMap[p.assigned_doctor_id]}</div>}
-                      {p.assigned_nurse_id && <div className="text-emerald-600 font-medium">{nurseMap[p.assigned_nurse_id]}</div>}
+                      {p.assigned_doctor_id && <div className="text-black font-medium">{doctorMap[p.assigned_doctor_id]}</div>}
+                      {p.assigned_nurse_id && <div className="text-gray-700 font-medium">{nurseMap[p.assigned_nurse_id]}</div>}
                       {!p.assigned_doctor_id && !p.assigned_nurse_id && <span>Unassigned</span>}
                     </td>
                     <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
                         <Link
                           to={`/patient/${p.patient_id}`}
-                          className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+                          className="text-black hover:text-black font-medium text-sm"
                         >
                           View Profile
                         </Link>
                         {profile?.role === "admin" && (
                           <button
                             onClick={() => requestRemove(p.user_id)}
-                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center"
+                            className="text-black hover:text-black p-2 hover:bg-gray-50 rounded-lg transition-colors inline-flex items-center"
                             title="Remove Patient"
                           >
                             <Trash2 size={18} />

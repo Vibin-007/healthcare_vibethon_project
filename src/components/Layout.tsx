@@ -2,6 +2,7 @@ import { useState } from "react";
 import Sidebar from "./Sidebar";
 import { Menu, Bell, User } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import AIChatBot from "./AIChatBot";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,7 +31,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             
             <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100">
               <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-black rounded-full border-2 border-white"></span>
             </button>
             
             <button className="w-9 h-9 rounded-full bg-gray-900 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm ring-1 ring-gray-200">
@@ -47,6 +48,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+      
+      {/* Global AI Chatbot Widget */}
+      <AIChatBot />
     </div>
   );
 }

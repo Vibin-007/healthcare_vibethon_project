@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
-import { generateVitalsInsight } from "../lib/ai";
-import Layout from "../components/Layout";
+import { supabase } from "../../lib/supabase";
+import { generateVitalsInsight, detectImpendingHealthDip, getSmartMedicationReminders } from "../../lib/ai";
+import Layout from "../../components/Layout";
 import {
   ArrowLeft,
   HeartPulse,
@@ -201,7 +201,7 @@ export default function PatientDetail() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[80vh]">
-          <div className="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-2 border-black border-t-transparent rounded-full animate-spin" />
         </div>
       </Layout>
     );
@@ -215,7 +215,7 @@ export default function PatientDetail() {
           <p className="text-gray-500">Patient not found</p>
           <button
             onClick={() => navigate("/dashboard")}
-            className="text-purple-600 hover:text-purple-600 text-sm mt-2 transition-colors"
+            className="text-black hover:text-black text-sm mt-2 transition-colors"
           >
             Back to Dashboard
           </button>
@@ -226,9 +226,19 @@ export default function PatientDetail() {
 
   const latestVitals = vitals[vitals.length - 1];
 
+  const healthDipWarning = detectImpendingHealthDip(vitals.map(v => ({
+    sleep_hours: v.sleep_hours,
+    pain_level: v.pain_level,
+    heart_rate: v.heart_rate,
+    blood_pressure: v.blood_pressure,
+    created_at: v.created_at
+  })));
+
+  const smartReminders = getSmartMedicationReminders(medications, latestVitals);
+
   const latestMetrics = [
-    { label: "Heart Rate", value: latestVitals?.heart_rate, unit: "bpm", icon: HeartPulse, color: "text-red-400", bg: "bg-red-500/10" },
-    { label: "Blood Pressure", value: latestVitals?.blood_pressure, unit: "mmHg", icon: Activity, color: "text-purple-400", bg: "bg-purple-500/10" },
+    { label: "Heart Rate", value: latestVitals?.heart_rate, unit: "bpm", icon: HeartPulse, color: "text-gray-600", bg: "bg-gray-800/10" },
+    { label: "Blood Pressure", value: latestVitals?.blood_pressure, unit: "mmHg", icon: Activity, color: "text-gray-600", bg: "bg-black/10" },
     { label: "Sleep", value: latestVitals?.sleep_hours, unit: "hrs", icon: Wind, color: "text-amber-400", bg: "bg-amber-500/10" },
     { label: "Pain Level", value: latestVitals?.pain_level, unit: "/10", icon: Droplets, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   ];
@@ -253,32 +263,52 @@ export default function PatientDetail() {
           
           <button
             onClick={() => navigate(`/log-vitals/${id}`)}
-            className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all shadow-sm"
+            className="bg-gray-50 text-black hover:bg-gray-100 border border-gray-200 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all shadow-sm"
           >
             <Activity size={16} /> Log Vitals
           </button>
         </div>
 
-        {aiInsight && (
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 flex gap-4 items-start shadow-sm shadow-purple-500/20 text-white">
-            <div className="bg-white/20 p-2 rounded-lg shrink-0 mt-0.5">
-              <Sparkles size={20} className="text-white" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm mb-0.5 flex items-center gap-2">
-                AI Triage Alert
-              </h3>
-              <p className="text-sm text-indigo-50 leading-relaxed">
-                {aiInsight}
-              </p>
-            </div>
+        {(aiInsight || healthDipWarning) && (
+          <div className="bg-black rounded-xl p-4 flex flex-col gap-3 shadow-sm shadow-black/20 text-white">
+            {aiInsight && (
+              <div className="flex gap-4 items-start">
+                <div className="bg-white/20 p-2 rounded-lg shrink-0 mt-0.5">
+                  <Sparkles size={20} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm mb-0.5 flex items-center gap-2">
+                    AI Triage Alert
+                  </h3>
+                  <p className="text-sm text-gray-100 leading-relaxed">
+                    {aiInsight}
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            {healthDipWarning && (
+              <div className="flex gap-4 items-start border-t border-white/10 pt-3">
+                <div className="bg-white/20 p-2 rounded-lg shrink-0 mt-0.5">
+                  <AlertTriangle size={20} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm mb-0.5 flex items-center gap-2 text-white">
+                    Predictive Health Dip Warning (Sleep & Pain Correlation)
+                  </h3>
+                  <p className="text-sm text-gray-100 leading-relaxed">
+                    {healthDipWarning}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-purple-600/20 flex items-center justify-center text-purple-600 text-2xl font-bold">
+              <div className="w-16 h-16 rounded-full bg-black/20 flex items-center justify-center text-black text-2xl font-bold">
                 {patient.name.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -297,7 +327,7 @@ export default function PatientDetail() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs bg-purple-600/10 border border-purple-200 px-3 py-1.5 rounded-full text-purple-600">
+              <span className="text-xs bg-black/10 border border-gray-200 px-3 py-1.5 rounded-full text-black">
                 {patient.disease_condition || "General"}
               </span>
             </div>
@@ -307,13 +337,13 @@ export default function PatientDetail() {
           {(assignedDoctor || assignedNurse) && (
             <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap gap-4">
               {assignedDoctor && (
-                <div className="flex items-center gap-2 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg text-sm font-medium">
+                <div className="flex items-center gap-2 bg-gray-50 text-black px-3 py-1.5 rounded-lg text-sm font-medium">
                   <Stethoscope size={16} />
                   <span>Assigned Doctor: {assignedDoctor}</span>
                 </div>
               )}
               {assignedNurse && (
-                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg text-sm font-medium">
+                <div className="flex items-center gap-2 bg-gray-50 text-black px-3 py-1.5 rounded-lg text-sm font-medium">
                   <NurseIcon size={16} />
                   <span>Assigned Nurse: {assignedNurse}</span>
                 </div>
@@ -354,7 +384,7 @@ export default function PatientDetail() {
                   onClick={() => setActiveTab("chart")}
                   className={`px-5 py-3 text-sm font-medium transition-colors ${
                     activeTab === "chart"
-                      ? "text-purple-600 border-b-2 border-purple-500"
+                      ? "text-black border-b-2 border-black"
                       : "text-gray-500 hover:text-gray-600"
                   }`}
                 >
@@ -364,7 +394,7 @@ export default function PatientDetail() {
                   onClick={() => setActiveTab("table")}
                   className={`px-5 py-3 text-sm font-medium transition-colors ${
                     activeTab === "table"
-                      ? "text-purple-600 border-b-2 border-purple-500"
+                      ? "text-black border-b-2 border-black"
                       : "text-gray-500 hover:text-gray-600"
                   }`}
                 >
@@ -514,7 +544,7 @@ export default function PatientDetail() {
             </p>
             <button
               onClick={() => navigate(`/log-vitals/${id}`)}
-              className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-2 transition-all shadow-sm"
+              className="bg-gray-50 text-black hover:bg-gray-100 border border-gray-200 px-4 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-2 transition-all shadow-sm"
             >
               <Activity size={16} /> Log Vitals
             </button>
@@ -522,109 +552,148 @@ export default function PatientDetail() {
         )}
 
         {/* Medications Section */}
-        <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden mt-6">
-          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Pill size={20} className="text-purple-600" />
-              Medications
-            </h2>
-            <button
-              onClick={() => setShowAddMedication(!showAddMedication)}
-              className="bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors border border-purple-100"
-            >
-              <Plus size={16} /> Add Medication
-            </button>
-          </div>
-          
-          {showAddMedication && (
-            <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-              <form onSubmit={handleAddMedication} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={newMedication.medicine_name}
-                    onChange={(e) => setNewMedication({ ...newMedication, medicine_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-sm"
-                    placeholder="e.g. Lisinopril"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Dosage</label>
-                  <input
-                    type="text"
-                    required
-                    value={newMedication.dosage}
-                    onChange={(e) => setNewMedication({ ...newMedication, dosage: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-sm"
-                    placeholder="e.g. 10mg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Frequency</label>
-                  <input
-                    type="text"
-                    required
-                    value={newMedication.frequency}
-                    onChange={(e) => setNewMedication({ ...newMedication, frequency: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-sm"
-                    placeholder="e.g. Once daily"
-                  />
-                </div>
-                <div>
-                  <button
-                    type="submit"
-                    disabled={submittingMed}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 h-[38px]"
-                  >
-                    {submittingMed ? "Saving..." : "Save Medication"}
-                  </button>
-                </div>
-              </form>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="lg:col-span-2 bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Pill size={20} className="text-black" />
+                Medications
+              </h2>
+              <button
+                onClick={() => setShowAddMedication(!showAddMedication)}
+                className="bg-gray-50 hover:bg-gray-100 text-black px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors border border-gray-200"
+              >
+                <Plus size={16} /> Add Medication
+              </button>
             </div>
-          )}
+            
+            {showAddMedication && (
+              <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+                <form onSubmit={handleAddMedication} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={newMedication.medicine_name}
+                      onChange={(e) => setNewMedication({ ...newMedication, medicine_name: e.target.value })}
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/20 text-sm"
+                      placeholder="e.g. Lisinopril"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Dosage</label>
+                    <input
+                      type="text"
+                      required
+                      value={newMedication.dosage}
+                      onChange={(e) => setNewMedication({ ...newMedication, dosage: e.target.value })}
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/20 text-sm"
+                      placeholder="e.g. 10mg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Frequency</label>
+                    <input
+                      type="text"
+                      required
+                      value={newMedication.frequency}
+                      onChange={(e) => setNewMedication({ ...newMedication, frequency: e.target.value })}
+                      className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/20 text-sm"
+                      placeholder="e.g. Once daily"
+                    />
+                  </div>
+                  <div>
+                    <button
+                      type="submit"
+                      disabled={submittingMed}
+                      className="w-full bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 h-[38px]"
+                    >
+                      {submittingMed ? "Saving..." : "Save Medication"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
 
-          <div className="p-0">
-            {medications.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-gray-500">
-                  <thead className="text-xs text-gray-400 uppercase bg-transparent border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-3 font-medium">Medication Name</th>
-                      <th className="px-6 py-3 font-medium">Dosage</th>
-                      <th className="px-6 py-3 font-medium">Frequency</th>
-                      <th className="px-6 py-3 font-medium">Added On</th>
-                      <th className="px-6 py-3 font-medium text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {medications.map((med) => (
-                      <tr key={med.medication_id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4 font-medium text-gray-900">{med.medicine_name}</td>
-                        <td className="px-6 py-4 text-gray-500">{med.dosage}</td>
-                        <td className="px-6 py-4 text-gray-500">{med.frequency}</td>
-                        <td className="px-6 py-4 text-gray-500">
-                          {new Date(med.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => handleRemoveMedication(med.medication_id)}
-                            className="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center"
-                            title="Remove Medication"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
+            <div className="p-0">
+              {medications.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left text-gray-500">
+                    <thead className="text-xs text-gray-400 uppercase bg-transparent border-b border-gray-200">
+                      <tr>
+                        <th className="px-6 py-3 font-medium">Medication Name</th>
+                        <th className="px-6 py-3 font-medium">Dosage</th>
+                        <th className="px-6 py-3 font-medium">Frequency</th>
+                        <th className="px-6 py-3 font-medium">Added On</th>
+                        <th className="px-6 py-3 font-medium text-right">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {medications.map((med) => (
+                        <tr key={med.medication_id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4 font-medium text-gray-900">{med.medicine_name}</td>
+                          <td className="px-6 py-4 text-gray-500">{med.dosage}</td>
+                          <td className="px-6 py-4 text-gray-500">{med.frequency}</td>
+                          <td className="px-6 py-4 text-gray-500">
+                            {new Date(med.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => handleRemoveMedication(med.medication_id)}
+                              className="text-black hover:text-black p-1.5 hover:bg-gray-50 rounded-lg transition-colors inline-flex items-center"
+                              title="Remove Medication"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <Pill size={32} className="text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-500">No medications recorded yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* AI Sleep-Adaptive Schedule Column */}
+          <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-6 space-y-4 h-fit">
+            <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
+              <Sparkles size={18} className="text-black shrink-0" />
+              <h3 className="font-bold text-gray-900">AI Sleep-Adaptive Schedule</h3>
+            </div>
+            {smartReminders.length > 0 ? (
+              <div className="space-y-4">
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Medication schedules automatically adapt to the patient's sleep patterns to optimize recovery and prevent adverse drug interactions.
+                </p>
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                  {smartReminders.map((rem, idx) => (
+                    <div key={idx} className="p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-1.5 transition-all hover:border-gray-400">
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="font-semibold text-sm text-gray-900 break-words">{rem.medicine_name}</span>
+                        {rem.priority === "high" && (
+                          <span className="text-[9px] font-bold bg-black text-white px-2 py-0.5 rounded shrink-0">HIGH PRIORITY</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-gray-400 line-through">{rem.original_time}</span>
+                        <span className="text-black font-bold">➔ {rem.adjusted_time}</span>
+                      </div>
+                      <p className="text-[11px] text-gray-600 italic leading-relaxed">{rem.reason}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
-              <div className="p-8 text-center">
-                <Pill size={32} className="text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500">No medications recorded yet</p>
+              <div className="text-center py-8">
+                <Activity size={24} className="text-gray-400 mx-auto mb-2" />
+                <p className="text-xs text-gray-500">No active adaptive schedules. Log patient sleep hours and medications to see smart reminders.</p>
               </div>
             )}
           </div>
